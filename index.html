@@ -223,10 +223,25 @@ a{color:inherit}
 .solape{
   display:flex;justify-content:center;
   padding-inline:24px;
-  background:linear-gradient(to bottom,var(--hueso) 0 44%,var(--negro) 44% 100%);
+  background:linear-gradient(to bottom,var(--hueso) 0 21%,var(--negro) 21% 100%);
 }
-.solape--invertido{background:linear-gradient(to bottom,var(--negro) 0 44%,var(--hueso) 44% 100%)}
-.retrato{width:min(290px,64vw)}
+.solape--invertido{background:linear-gradient(to bottom,var(--negro) 0 21%,var(--hueso) 21% 100%)}
+.retrato{width:min(270px,60vw)}
+
+/* pase de fotos de la portada */
+.pase{position:relative;aspect-ratio:9/10;overflow:hidden;background:#d6d5d3}
+.pase img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  filter:grayscale(1) contrast(1.06) brightness(.99);
+  opacity:0;
+  transition:opacity 1.6s ease;
+}
+.pase img.activa{opacity:1}
+.puntos{display:flex;justify-content:center;gap:7px;margin-top:14px}
+.punto{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.35);transition:background .5s ease}
+.punto.activo{background:rgba(255,255,255,.9)}
 
 /* fotos */
 .marco{position:relative;width:100%;overflow:hidden;background:#dcdbd9}
@@ -411,8 +426,14 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   </div>
 
   <div class="solape">
-    <div class="retrato marco vertical aparece" data-falta="fotos/pedida.jpg">
-      <img class="foto" src="fotos/pedida.jpg" alt="Pablo y Adri el día de la pedida" loading="eager">
+    <div class="retrato aparece">
+      <div class="pase" id="pase">
+        <img class="diapo activa" src="fotos/pedida.jpg" alt="Pablo y Adri el día de la pedida" style="object-position:center 62%">
+        <img class="diapo" src="fotos/muro.jpg" alt="Pablo y Adri de boda" style="object-position:center 72%">
+        <img class="diapo" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" style="object-position:center 38%">
+        <img class="diapo" src="fotos/noche.jpg" alt="Pablo y Adri una noche de invierno" style="object-position:center 46%">
+      </div>
+      <div class="puntos" id="puntos" aria-hidden="true"></div>
     </div>
   </div>
 
@@ -514,8 +535,8 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 
   <!-- Frase -->
   <div class="solape solape--invertido">
-    <div class="retrato marco vertical aparece" data-falta="fotos/campo.jpg">
-      <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy">
+    <div class="retrato marco aparece" data-falta="fotos/campo.jpg" style="aspect-ratio:9/10">
+      <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy" style="object-position:center 38%">
     </div>
   </div>
   <div class="banda">
@@ -715,6 +736,46 @@ sobre.addEventListener('click', () => {
     document.body.classList.remove('bloqueado');
   }, espera);
 });
+
+/* ── Pase de fotos de la portada ───────────────────────────────── */
+const pase = $('#pase');
+if (pase) {
+  const diapos = [...pase.querySelectorAll('.diapo')];
+  const puntos = $('#puntos');
+
+  // una foto que no cargue sale del pase en vez de dejar un hueco negro
+  diapos.forEach((img) => {
+    img.addEventListener('error', () => {
+      const i = diapos.indexOf(img);
+      if (i > -1) { diapos.splice(i, 1); img.remove(); dibujarPuntos(); }
+    });
+  });
+
+  let actual = 0;
+  function dibujarPuntos() {
+    puntos.innerHTML = '';
+    if (diapos.length < 2) return;
+    diapos.forEach((_, i) => {
+      const p = document.createElement('span');
+      p.className = 'punto' + (i === actual ? ' activo' : '');
+      puntos.appendChild(p);
+    });
+  }
+  function pasar() {
+    if (diapos.length < 2) return;
+    diapos[actual].classList.remove('activa');
+    actual = (actual + 1) % diapos.length;
+    diapos[actual].classList.add('activa');
+    dibujarPuntos();
+  }
+  dibujarPuntos();
+  let reloj2 = setInterval(pasar, 4200);
+  // sin la pestaña delante no tiene sentido seguir pasando fotos
+  document.addEventListener('visibilitychange', () => {
+    clearInterval(reloj2);
+    if (!document.hidden) reloj2 = setInterval(pasar, 4200);
+  });
+}
 
 /* ── Fotos que falten ──────────────────────────────────────────── */
 document.querySelectorAll('img.foto').forEach((img) => {
