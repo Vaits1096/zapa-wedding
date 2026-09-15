@@ -1,0 +1,11 @@
+# Plantilla de referencia: 29 MB de un producto comercial de terceros
+# (loventinvita.store). No se publica.
+PAGINA_EJEMPLO/
+
+# Música: no subas canciones con derechos a un repositorio público.
+musica/
+
+# Windows / macOS
+Thumbs.db
+desktop.ini
+.DS_Store
