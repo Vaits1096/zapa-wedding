@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pablo &amp; Adri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -450,6 +452,39 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   .cuenta{gap:4px}
 }
 
+
+/* ── Pantallas pequeñas: los tamaños en px fijos se quedaban cortos ── */
+@media (max-width:520px){
+  body{font-size:18px}
+  .versal{font-size:14px;letter-spacing:.16em}
+  .sitio .direccion{font-size:16px}
+  .agenda .hora,.agenda .que{font-size:16px}
+  .agenda li{grid-template-columns:28px minmax(78px,auto) 18px 1fr}
+  .icono{width:42px;height:42px}
+  .icono--agenda{width:28px;height:28px}
+  .casilla .unidad{font-size:15px}
+  .texto-collage .cita{font-size:16px}
+  label,.rotulo-campo{font-size:11px;letter-spacing:.2em}
+  input[type=text],textarea,select{font-size:17px}
+  .opcion span{font-size:11px;letter-spacing:.18em;padding:15px 8px}
+  .boton{font-size:12px;letter-spacing:.22em;padding:17px 22px}
+  .boton-mapa{font-size:14px;padding:12px 30px}
+  .aviso{font-size:16px}
+  .contacto .numero{font-size:15px}
+  .contacto .quien{font-size:42px}
+  .cierre-fecha{font-size:14px}
+  .iban{letter-spacing:.1em}
+}
+
+
+/* En móviles estrechos la raya del itinerario se come el ancho del texto */
+@media (max-width:400px){
+  .agenda li{grid-template-columns:26px auto 1fr;gap:12px}
+  .agenda .raya{display:none}
+  .agenda .hora{font-size:15px}
+  .icono--agenda{width:26px;height:26px}
+}
+
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -700,6 +735,7 @@ const IBAN       = 'ES00 0000 0000 0000 0000 0000';    // ⚠ CAMBIA ESTO por la
 const CANCION    = 'musica/cancion.mp3';               // opcional
 /* ════════════════════════════════════════════════════════════════ */
 
+document.documentElement.lang = 'es';
 document.documentElement.classList.add('js');
 const $ = (s) => document.querySelector(s);
 
