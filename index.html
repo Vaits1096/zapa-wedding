@@ -27,6 +27,8 @@
   --linea:rgba(28,26,26,.16);
   --linea-clara:rgba(255,255,255,.22);
 
+  --grano:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22r%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23r)%22/></svg>');
+
   --display:"Bodoni Moda",'Didot','Times New Roman',serif;
   --lectura:"Inria Serif",'Georgia',serif;
   --caligrafia:"Allura",'Snell Roundhand',cursive;
@@ -225,7 +227,7 @@ a{color:inherit}
   padding-inline:24px;
   background:linear-gradient(to bottom,var(--hueso) 0 21%,var(--negro) 21% 100%);
 }
-.retrato{width:min(270px,60vw)}
+.retrato{width:min(330px,70vw)}
 
 /* pase de fotos de la portada */
 .pase{position:relative;aspect-ratio:9/10;overflow:hidden;background:#d6d5d3}
@@ -243,10 +245,8 @@ a{color:inherit}
 .punto.activo{background:rgba(255,255,255,.9)}
 
 /* fotos */
-.marco{position:relative;width:100%;overflow:hidden;background:#dcdbd9}
-.marco img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) contrast(1.06) brightness(.99)}
-.marco.sin-foto img,.arco.sin-foto img,.recuadro.sin-foto img{opacity:0}
-.marco.sin-foto::after,.sangre.sin-foto::after,.arco.sin-foto::after,.recuadro.sin-foto::after{
+.arco.sin-foto img,.recuadro.sin-foto img,.pase.sin-foto img{opacity:0}
+.sangre.sin-foto::after,.arco.sin-foto::after,.recuadro.sin-foto::after{
   content:attr(data-falta);
   position:absolute;inset:0;display:grid;place-items:center;
   padding:18px;text-align:center;
@@ -340,6 +340,25 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 .monograma{font-family:var(--display);font-size:clamp(23px,6.4vw,30px);letter-spacing:.24em;text-transform:uppercase;line-height:1.3em}
 .cierre-fecha{font-family:var(--lectura);font-size:13px;letter-spacing:.3em;font-variant-numeric:tabular-nums;color:rgba(238,238,238,.6)}
 
+
+
+/* ── Grano de película sobre todas las fotos ───────────────────── */
+/* ::after ya lo usa el aviso de foto que falta, así que va en ::before.
+   isolation aísla la mezcla para que no tiña el fondo de la página. */
+.pase,.sangre,.arco,.recuadro{isolation:isolate}
+.pase::before,.sangre::before,.arco::before,.recuadro::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:3;
+  background-image:var(--grano);
+  background-size:200px 200px;
+  mix-blend-mode:overlay;
+  opacity:.34;
+  pointer-events:none;
+}
+/* en la banda ancha el grano se ve más porque la foto es más grande */
+.sangre::before{opacity:.28;background-size:260px 260px}
 
 /* ── Iconos de línea, heredan el color de la banda ─────────────── */
 .icono{
