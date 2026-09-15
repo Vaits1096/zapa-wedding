@@ -225,7 +225,6 @@ a{color:inherit}
   padding-inline:24px;
   background:linear-gradient(to bottom,var(--hueso) 0 21%,var(--negro) 21% 100%);
 }
-.solape--invertido{background:linear-gradient(to bottom,var(--negro) 0 21%,var(--hueso) 21% 100%)}
 .retrato{width:min(270px,60vw)}
 
 /* pase de fotos de la portada */
@@ -246,15 +245,14 @@ a{color:inherit}
 /* fotos */
 .marco{position:relative;width:100%;overflow:hidden;background:#dcdbd9}
 .marco img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1) contrast(1.06) brightness(.99)}
-.marco.sin-foto img{opacity:0}
-.marco.sin-foto::after,.sangre.sin-foto::after{
+.marco.sin-foto img,.arco.sin-foto img,.recuadro.sin-foto img{opacity:0}
+.marco.sin-foto::after,.sangre.sin-foto::after,.arco.sin-foto::after,.recuadro.sin-foto::after{
   content:attr(data-falta);
   position:absolute;inset:0;display:grid;place-items:center;
   padding:18px;text-align:center;
   font-family:var(--display);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#6e6a68;
   background:repeating-linear-gradient(45deg,#e0dfdd 0 10px,#d4d3d1 10px 20px);
 }
-.vertical{aspect-ratio:3/4}
 
 .sangre{width:100%;overflow:hidden;line-height:0;position:relative}
 .sangre img{
@@ -262,7 +260,8 @@ a{color:inherit}
   object-fit:cover;object-position:center 34%;
   filter:grayscale(1) contrast(1.06);
 }
-.sangre img.alto{object-position:center 64%}
+.sangre img.alto{object-position:center 45%}
+.sangre img.ancho-campo{object-position:center 22%}
 .sangre.sin-foto{height:clamp(230px,44vw,400px)}
 .sangre.sin-foto img{display:none}
 
@@ -273,25 +272,6 @@ a{color:inherit}
 .casilla .unidad{font-family:var(--lectura);font-size:14px;letter-spacing:.06em;color:rgba(238,238,238,.68)}
 .hoy{font-family:var(--caligrafia);font-size:clamp(42px,11vw,60px);line-height:1.1em}
 
-/* ubicaciones */
-.sitios{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,5vw,40px);width:100%}
-.sitio{display:flex;flex-direction:column;align-items:center;gap:8px}
-.sitio .titulo{font-family:var(--display);font-size:clamp(18px,4.8vw,23px);line-height:1.3em;text-transform:uppercase;letter-spacing:.04em}
-.sitio .direccion{font-size:16px;color:var(--texto-suave);line-height:1.5}
-.mapa{
-  font-family:var(--display);font-size:10px;letter-spacing:.26em;text-transform:uppercase;
-  text-decoration:none;border-bottom:1px solid var(--linea);
-  padding-bottom:4px;margin-top:3px;
-  transition:border-color .3s;
-}
-.mapa:hover{border-color:currentColor}
-
-/* itinerario */
-.paradas{display:flex;flex-direction:column;align-items:center;width:100%}
-.parada{display:flex;flex-direction:column;align-items:center;gap:5px}
-.parada .cuando{font-family:var(--display);font-size:clamp(24px,6.4vw,32px);line-height:1.3em;font-variant-numeric:tabular-nums}
-.parada .lugar{font-family:var(--display);font-size:13px;letter-spacing:.28em;text-transform:uppercase}
-.parada .detalle{font-size:16px;color:rgba(238,238,238,.7);font-style:italic;max-width:32ch;line-height:1.5}
 
 /* formulario */
 form{display:flex;flex-direction:column;gap:22px;width:100%;text-align:left}
@@ -359,6 +339,88 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 
 .monograma{font-family:var(--display);font-size:clamp(23px,6.4vw,30px);letter-spacing:.24em;text-transform:uppercase;line-height:1.3em}
 .cierre-fecha{font-family:var(--lectura);font-size:13px;letter-spacing:.3em;font-variant-numeric:tabular-nums;color:rgba(238,238,238,.6)}
+
+
+/* ── Iconos de línea, heredan el color de la banda ─────────────── */
+.icono{
+  width:38px;height:38px;flex:none;
+  fill:none;stroke:currentColor;
+  stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;
+}
+.icono--agenda{width:31px;height:31px}
+
+/* ── Ceremonia / Celebración ───────────────────────────────────── */
+.sitios{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,64px);width:100%}
+.sitio{display:flex;flex-direction:column;align-items:center;gap:12px}
+.sitio .titulo{
+  font-family:var(--display);
+  font-size:clamp(17px,4.6vw,21px);
+  line-height:1.3em;text-transform:uppercase;letter-spacing:.06em;
+  margin-top:2px;
+}
+.sitio .direccion{font-size:15px;color:var(--texto-suave);line-height:1.45}
+.boton-mapa{
+  font-family:var(--lectura);
+  font-size:13px;font-weight:700;
+  background:var(--negro);color:var(--hueso);
+  padding:11px 32px;border-radius:2px;
+  text-decoration:none;margin-top:4px;
+  transition:opacity .3s ease;
+}
+.boton-mapa:hover{opacity:.78}
+.boton-mapa:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
+
+/* ── Itinerario ────────────────────────────────────────────────── */
+.agenda{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:clamp(20px,4.4vw,28px);
+  text-align:left;
+}
+.agenda li{
+  display:grid;
+  grid-template-columns:31px minmax(84px,auto) 26px 1fr;
+  align-items:center;
+  gap:clamp(10px,3vw,18px);
+}
+.agenda .hora{font-family:var(--lectura);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.agenda .raya{height:1px;background:rgba(238,238,238,.55)}
+.agenda .que{font-family:var(--lectura);font-size:15px;line-height:1.35}
+
+/* ── Collage: arco grande y recuadro montado encima ────────────── */
+.collage{
+  max-width:940px;margin:0 auto;
+  padding-inline:24px;
+  padding-block:clamp(50px,9vw,86px);
+  display:grid;
+  grid-template-columns:1fr 1.1fr;
+  gap:clamp(20px,4vw,50px);
+  align-items:end;
+}
+.pila{position:relative;padding-right:13%;padding-bottom:17%}
+.arco{
+  margin:0;position:relative;width:100%;aspect-ratio:3/4;
+  border-radius:50% 50% 0 0 / 38% 38% 0 0;
+  overflow:hidden;background:#d6d5d3;
+}
+.recuadro{
+  margin:0;position:absolute;right:0;bottom:0;
+  width:57%;aspect-ratio:3/4;
+  overflow:hidden;background:#d6d5d3;
+}
+.arco img,.recuadro img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:grayscale(1) contrast(1.06) brightness(.99);
+}
+.texto-collage{text-align:left;padding-bottom:8%;display:flex;flex-direction:column;gap:14px}
+.texto-collage .cita{font-size:clamp(15px,3.6vw,17px);font-style:italic;color:var(--texto-suave);line-height:1.5;max-width:26ch}
+.texto-collage .script{font-size:clamp(34px,8vw,46px)}
+
+@media (max-width:720px){
+  .collage{grid-template-columns:1fr;gap:26px;justify-items:center}
+  .pila{width:min(300px,86%);padding-right:16%;padding-bottom:20%}
+  .texto-collage{text-align:center;align-items:center;padding-bottom:0}
+  .texto-collage .cita{max-width:32ch}
+}
 
 /* apariciones al hacer scroll (sólo con JS) */
 .js .aparece{opacity:0;transform:translateY(26px)}
@@ -468,23 +530,23 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   <!-- Dónde -->
   <div class="banda">
     <div class="interior">
-      <p class="rotulo aparece">Dónde</p>
-      <div class="filete aparece"></div>
       <div class="sitios aparece">
         <div class="sitio">
+          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6v3.9M10.3 3.3h3.4"/><path d="M7 10.2 12 5.6l5 4.6"/><path d="M7 10.2V21h10V10.2"/><path d="M5.2 21h13.6"/><path d="M10.3 21v-3.4a1.7 1.7 0 0 1 3.4 0V21"/><path d="M12 12.1v2M11 13.1h2"/></svg>
           <span class="titulo">Ceremonia</span>
-          <span class="direccion">Iglesia de San Bartolomé<br>Logroño</span>
-          <a class="mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Iglesia+de+San+Bartolom%C3%A9%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <span class="direccion">Iglesia de San Bartolomé,<br>Logroño.</span>
+          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Iglesia+de+San+Bartolom%C3%A9%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
         </div>
         <div class="sitio">
+          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 3.7 9.6 5.2 7.2 12Z"/><path d="M7.2 12 9.4 17.5"/><path d="M7.5 18.4l4.1-1"/><path d="M20.8 3.7 14.4 5.2 16.8 12Z"/><path d="M16.8 12 14.6 17.5"/><path d="M16.5 18.4l-4.1-1"/></svg>
           <span class="titulo">Celebración</span>
-          <span class="direccion">Bodegas Proelio<br>La Rioja</span>
-          <a class="mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Bodegas+Proelio" target="_blank" rel="noopener">Ver mapa</a>
+          <span class="direccion">Bodegas Proelio,<br>La Rioja.</span>
+          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Bodegas+Proelio" target="_blank" rel="noopener">Ver mapa</a>
         </div>
       </div>
       <div class="filete aparece"></div>
       <p class="versal aparece">Habrá autobuses saliendo de Marqués de Murrieta</p>
-      <a class="mapa aparece" href="https://www.google.com/maps/search/?api=1&amp;query=Marqu%C3%A9s+de+Murrieta%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver punto de salida</a>
+      <a class="boton-mapa aparece" href="https://www.google.com/maps/search/?api=1&amp;query=Marqu%C3%A9s+de+Murrieta%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver punto de salida</a>
     </div>
   </div>
 
@@ -493,61 +555,37 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
     <div class="interior">
       <p class="rotulo aparece">Itinerario</p>
       <div class="filete aparece"></div>
-      <div class="paradas">
-        <div class="parada aparece">
-          <span class="cuando">13:00</span>
-          <span class="lugar">Ceremonia</span>
-          <span class="detalle">Iglesia de San Bartolomé</span>
-        </div>
-        <div class="filete aparece"></div>
-        <div class="parada aparece">
-          <span class="cuando">14:30</span>
-          <span class="lugar">Autobuses</span>
-          <span class="detalle">Salida desde Marqués de Murrieta</span>
-        </div>
-        <div class="filete aparece"></div>
-        <div class="parada aparece">
-          <span class="cuando">15:00</span>
-          <span class="lugar">Bodegas Proelio</span>
-          <span class="detalle">Llegada. Aquí empieza lo bueno</span>
-        </div>
-        <div class="filete aparece"></div>
-        <div class="parada aparece">
-          <span class="cuando">15:00 — 17:00</span>
-          <span class="lugar">Cóctel</span>
-          <span class="detalle">Entre viñedos</span>
-        </div>
-        <div class="filete aparece"></div>
-        <div class="parada aparece">
-          <span class="cuando">17:00 — 19:00</span>
-          <span class="lugar">Comida</span>
-          <span class="detalle">Sentaos, que hay rato</span>
-        </div>
-        <div class="filete aparece"></div>
-        <div class="parada aparece">
-          <span class="cuando">19:00 — 00:30</span>
-          <span class="lugar">Fiesta</span>
-          <span class="detalle">Hasta que cierren la bodega</span>
-        </div>
+      <ul class="agenda">
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="14.2" r="5.6"/><circle cx="15.4" cy="11.4" r="4.9"/><path d="m15.4 3.1 1.7 2-1.7 2-1.7-2Z"/></svg><span class="hora">13:00</span><span class="raya"></span><span class="que">Ceremonia</span></li>
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">14:30</span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.4h9.6l-.8 5.6a4 4 0 0 1-8 0Z"/><path d="M12 13v6"/><path d="M8.6 19.6h6.8"/></svg><span class="hora">15:00</span><span class="raya"></span><span class="que">Llegada a Bodegas Proelio</span></li>
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 4.6h16.4L12 13.2Z"/><path d="M12 13.2v5.4"/><path d="M8.4 19.2h7.2"/><circle cx="15.6" cy="7.6" r=".9"/></svg><span class="hora">15:00 — 17:00</span><span class="raya"></span><span class="que">Cóctel de bienvenida</span></li>
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.4" r="5.8"/><circle cx="12" cy="12.4" r="2.6"/><path d="M4 3.6v3.8a1.5 1.5 0 0 0 3 0V3.6M5.5 7.4V20"/><path d="M19.4 3.6c1.4 0 2.1 1.9 2.1 3.8s-.7 3-2.1 3Zm0 7.2V20"/></svg><span class="hora">17:00 — 19:00</span><span class="raya"></span><span class="que">Comida</span></li>
+          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 7.8 9.4l6.8 6.8Z"/><path d="m8.6 11.4 4 4"/><path d="M14.4 3.4v2.2M19.8 6.2l-1.6 1.5M21 12.2l-2.2.3M17.4 16.6l1.9 1.2"/><circle cx="17.6" cy="11" r=".75"/></svg><span class="hora">19:00 — 00:30</span><span class="raya"></span><span class="que">Fiesta</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Collage: campo en arco, noche montada encima -->
+  <div class="banda">
+    <div class="collage">
+      <div class="texto-collage aparece">
+        <p class="cita">Desde el primer día supimos que esto iba en serio. Ahora sólo falta que estéis vosotros.</p>
+        <p class="script">Tú y yo,<br>para siempre</p>
+      </div>
+      <div class="pila aparece">
+        <figure class="arco" data-falta="fotos/campo.jpg">
+          <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy" style="object-position:center 30%">
+        </figure>
+        <figure class="recuadro" data-falta="fotos/noche.jpg">
+          <img class="foto" src="fotos/noche.jpg" alt="Pablo y Adri una noche de invierno" loading="lazy" style="object-position:center 42%">
+        </figure>
       </div>
     </div>
   </div>
 
-  <!-- Frase -->
-  <div class="solape solape--invertido">
-    <div class="retrato marco aparece" data-falta="fotos/campo.jpg" style="aspect-ratio:9/10">
-      <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy" style="object-position:center 38%">
-    </div>
-  </div>
-  <div class="banda">
-    <div class="interior estrecho">
-      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:var(--texto-suave);font-style:italic">Desde el primer día supimos que esto iba en serio. Ahora sólo falta que estéis vosotros.</p>
-      <p class="script aparece">Tú y yo, para siempre</p>
-    </div>
-  </div>
-
-  <div class="sangre" data-falta="fotos/noche.jpg">
-    <img class="foto" src="fotos/noche.jpg" alt="Pablo y Adri una noche de invierno" loading="lazy">
+  <div class="sangre" data-falta="fotos/campo.jpg">
+    <img class="foto ancho-campo" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy">
   </div>
 
   <!-- Confirmar asistencia -->
@@ -779,7 +817,7 @@ if (pase) {
 
 /* ── Fotos que falten ──────────────────────────────────────────── */
 document.querySelectorAll('img.foto').forEach((img) => {
-  const fallo = () => img.closest('.marco, .sangre').classList.add('sin-foto');
+  const fallo = () => img.closest('.marco, .sangre, .arco, .recuadro').classList.add('sin-foto');
   img.addEventListener('error', fallo);
   if (img.complete && img.naturalWidth === 0) fallo();
 });
