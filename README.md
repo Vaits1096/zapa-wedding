@@ -1,11 +1,11 @@
-# Pablo & Adri — 15 de mayo de 2026
+# Pablo & Adri — 15 de mayo de 2027
 
 Invitación de boda. Una sola página, sin dependencias ni build: se abre
-`invitacion.html` en cualquier navegador y funciona.
+`index.html` en cualquier navegador y funciona.
 
 ## Cómo se usa
 
-Abre `invitacion.html`. Sale un sobre; al hacer clic se abre y da paso a la
+Abre `index.html`. Sale un sobre; al hacer clic se abre y da paso a la
 invitación. El scroll está bloqueado hasta entonces.
 
 ### Enlace personalizado por invitado
@@ -14,13 +14,13 @@ Añade `?n=` con el nombre y aparecerá en la pantalla del sobre, además de
 rellenarse solo en el formulario de confirmación:
 
 ```
-invitacion.html?n=Ana%20María%20López
+index.html?n=Ana%20María%20López
 ```
 
 ## Qué hay que editar
 
 Todo lo configurable está junto, al principio del `<script>` del final de
-`invitacion.html`:
+`index.html`:
 
 | constante    | qué es                                                   |
 |--------------|----------------------------------------------------------|
@@ -32,7 +32,7 @@ Todo lo configurable está junto, al principio del `<script>` del final de
 ## Estructura
 
 ```
-invitacion.html     la página entera: estructura, estilos y lógica
+index.html     la página entera: estructura, estilos y lógica
 fotos/              pedida.jpg  campo.jpg  muro.jpg  noche.jpg
 assets/             piezas del sobre: lacre, texturas de papel y sombras
 musica/             cancion.mp3 (opcional, no versionado)
