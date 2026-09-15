@@ -7,7 +7,7 @@
      CONFIGURACIÓN — todo lo editable está al principio del <script>:
        IBAN        → cuenta para el regalo (⚠ hay un marcador)
      Carpetas que necesita:
-       fotos/   pedida.jpg  campo.jpg  muro.jpg  noche.jpg
+       fotos/   pedida.jpg  muro.jpg  campo.jpg  noche.jpg  (ese es el orden)
        assets/  lacre.png  tex-lados.png  tex-sup.png  tex-inf.png
                 sombra-sup.png  sombra-inf.png
        musica/  cancion.mp3  (opcional: sin él, el botón no aparece)
@@ -226,7 +226,7 @@ a{color:inherit}
   background:linear-gradient(to bottom,var(--hueso) 0 44%,var(--negro) 44% 100%);
 }
 .solape--invertido{background:linear-gradient(to bottom,var(--negro) 0 44%,var(--hueso) 44% 100%)}
-.retrato{width:min(370px,76vw)}
+.retrato{width:min(290px,64vw)}
 
 /* fotos */
 .marco{position:relative;width:100%;overflow:hidden;background:#dcdbd9}
@@ -243,11 +243,12 @@ a{color:inherit}
 
 .sangre{width:100%;overflow:hidden;line-height:0;position:relative}
 .sangre img{
-  width:100%;height:clamp(320px,62vw,560px);
+  width:100%;height:clamp(230px,44vw,400px);
   object-fit:cover;object-position:center 34%;
   filter:grayscale(1) contrast(1.06);
 }
-.sangre.sin-foto{height:clamp(320px,62vw,560px)}
+.sangre img.alto{object-position:center 64%}
+.sangre.sin-foto{height:clamp(230px,44vw,400px)}
 .sangre.sin-foto img{display:none}
 
 /* cuenta atrás */
@@ -439,8 +440,8 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
     </div>
   </div>
 
-  <div class="sangre" data-falta="fotos/campo.jpg">
-    <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy">
+  <div class="sangre" data-falta="fotos/muro.jpg">
+    <img class="foto alto" src="fotos/muro.jpg" alt="Pablo y Adri de boda" loading="lazy">
   </div>
 
   <!-- Dónde -->
@@ -513,8 +514,8 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 
   <!-- Frase -->
   <div class="solape solape--invertido">
-    <div class="retrato marco vertical aparece" data-falta="fotos/muro.jpg">
-      <img class="foto" src="fotos/muro.jpg" alt="Pablo y Adri de boda" loading="lazy">
+    <div class="retrato marco vertical aparece" data-falta="fotos/campo.jpg">
+      <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy">
     </div>
   </div>
   <div class="banda">
