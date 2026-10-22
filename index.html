@@ -176,6 +176,9 @@ body.menu-abierto #menu{opacity:1;visibility:visible;transition:opacity .45s eas
   perspective:1500px;
   border:0;padding:0;background:transparent;
   cursor:pointer;display:block;
+  /* es un <button>: sin esto Safari en iPhone pinta los nombres de azul */
+  -webkit-appearance:none;appearance:none;
+  color:var(--texto);
 }
 .sobre:focus-visible{outline:1px solid var(--texto);outline-offset:18px}
 .sobre>span{position:absolute}
