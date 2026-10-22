@@ -312,7 +312,6 @@ body.menu-abierto #menu{opacity:1;visibility:visible;transition:opacity .45s eas
   filter:grayscale(1) contrast(1.06);
 }
 .sangre img.alto{object-position:center 45%}
-.sangre img.ancho-campo{object-position:center 22%}
 .sangre.sin-foto{height:clamp(230px,44vw,400px)}
 .sangre.sin-foto img{display:none}
 
@@ -472,12 +471,13 @@ label.marca{
 .sangre::before{opacity:.28;background-size:260px 260px}
 
 /* ── Iconos de línea, heredan el color de la banda ─────────────── */
+/* dibujados en una rejilla de 48: el trazo se ajusta al tamaño al que se ven */
 .icono{
-  width:38px;height:38px;flex:none;
+  width:48px;height:48px;flex:none;
   fill:none;stroke:currentColor;
-  stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;
+  stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;
 }
-.icono--agenda{width:31px;height:31px}
+.icono--agenda{width:31px;height:31px;stroke-width:2}
 
 /* ── Ceremonia / Celebración ───────────────────────────────────── */
 .sitios{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,64px);width:100%}
@@ -546,9 +546,37 @@ label.marca{
 .banda--negro .raya-corta{background:var(--linea-clara)}
 
 .hoteles{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(30px,5vw,64px);width:100%;text-align:left;margin-top:6px}
-.hotel{display:flex;flex-direction:column;gap:20px;padding-block:clamp(28px,4vw,40px);border-top:1px solid var(--linea)}
+/* ficha: foto | filete | nombre, código y botones; debajo, condiciones y parking */
+.hotel{
+  display:grid;
+  grid-template-columns:minmax(0,200px) minmax(0,1fr);
+  align-content:start;
+  padding-block:clamp(30px,4vw,44px);
+  border-top:1px solid var(--linea);
+}
+.hotel-foto{margin:0;position:relative;aspect-ratio:3/4;overflow:hidden;background:#d6d5d3;align-self:start}
+.hotel-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.hotel-info{
+  display:flex;flex-direction:column;gap:18px;
+  margin-left:clamp(18px,2.4vw,26px);padding-left:clamp(18px,2.4vw,26px);
+  border-left:1px solid var(--linea);
+}
+.hotel .detalles{grid-column:1/-1;margin-top:clamp(26px,3vw,34px)}
 .hotel-nombre{font-family:var(--display);font-size:clamp(18px,4.8vw,22px);line-height:1.3;letter-spacing:.06em;text-transform:uppercase}
-.hotel-nombre span{white-space:nowrap}
+.hotel-nombre .estrellas{display:block;margin-top:6px;font-family:var(--lectura);font-size:10px;letter-spacing:.45em;color:var(--texto-tenue)}
+.boton-linea{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:10px 18px;border:1px solid var(--texto);
+  font-family:var(--lectura);font-size:12px;letter-spacing:.2em;text-transform:uppercase;line-height:1.3;
+  color:var(--texto);text-decoration:none;white-space:nowrap;
+  transition:background .3s,color .3s;
+}
+.boton-linea .icono{width:15px;height:15px;stroke-width:3}
+.hotel-info>.botones{display:grid;grid-template-columns:1fr;max-width:240px;gap:8px}
+.hotel-info .codigo{width:100%;max-width:240px;justify-content:space-between;gap:10px;padding:8px 12px;font-size:16px}
+.hotel-info .codigo small{font-size:10px;letter-spacing:.14em}
+.boton-linea:hover{background:var(--negro);color:var(--hueso)}
+.boton-linea:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
 .etiqueta{font-family:var(--lectura);font-size:12px;letter-spacing:.22em;text-transform:uppercase;line-height:1.6;color:var(--texto-tenue)}
 .dato-hotel{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:15px;line-height:1.55;color:var(--texto-suave)}
 .codigo{
@@ -566,7 +594,7 @@ label.marca{
 .botones .boton-mapa{margin-top:0}
 .detalles{display:flex;flex-direction:column;gap:20px;padding-top:20px;border-top:1px solid var(--linea)}
 .detalle{display:grid;grid-template-columns:24px 1fr;gap:14px;align-items:start;font-size:15px;line-height:1.55;color:var(--texto-suave)}
-.detalle .icono{width:24px;height:24px;margin-top:1px}
+.detalle>.icono{width:24px;height:24px;margin-top:1px;stroke-width:2.2}
 .detalle p+p{margin-top:8px}
 .detalle b{font-weight:700;color:var(--texto)}
 .detalle .botones{margin-top:12px}
@@ -574,13 +602,27 @@ label.marca{
 @media (max-width:760px){
   .hoteles{grid-template-columns:1fr}
 }
+/* móvil: foto pequeña con el nombre al lado; código y botones a todo el ancho */
+@media (max-width:560px){
+  .hotel{grid-template-columns:118px minmax(0,1fr)}
+  .hotel-info{display:contents}
+  .hotel-nombre{
+    grid-column:2;grid-row:1;align-self:stretch;
+    display:flex;flex-direction:column;justify-content:center;
+    margin-left:18px;padding-left:18px;border-left:1px solid var(--linea);
+    font-size:18px;
+  }
+  .hotel-info>.dato-hotel{grid-column:1/-1;margin-top:24px}
+  .hotel-info>.botones{grid-column:1/-1;margin-top:16px;grid-template-columns:1fr 1fr;max-width:none}
+  .hotel-info .codigo{max-width:none;font-size:18px;padding:10px 16px}
+}
 
 /* ── Dress code ────────────────────────────────────────────────── */
 .rotulo--espaciado{letter-spacing:.3em}
 .vestuario{display:grid;grid-template-columns:1fr 1px 1fr;gap:clamp(22px,5vw,56px);width:100%;margin-top:10px}
 .vestuario .divisoria{background:var(--linea-clara)}
 .atuendo{display:flex;flex-direction:column;align-items:center;gap:12px}
-.atuendo .icono{width:40px;height:40px}
+.atuendo .icono{width:52px;height:52px}
 .atuendo-titulo{font-family:var(--display);font-size:clamp(17px,4.6vw,21px);letter-spacing:.22em;text-transform:uppercase;line-height:1.3;margin-top:4px}
 .prendas{font-family:var(--lectura);font-size:13px;letter-spacing:.2em;text-transform:uppercase;line-height:2}
 .atuendo .raya-corta{margin-block:6px}
@@ -646,7 +688,7 @@ label.marca{
   .agenda li{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:10px}
   .agenda .cuando{gap:10px}
   .agenda .hora{min-width:6.2em}
-  .icono{width:42px;height:42px}
+  .icono{width:48px;height:48px}
   .icono--agenda{width:28px;height:28px}
   .casilla .unidad{font-size:15px}
   .texto-collage .cita{font-size:16px}
@@ -672,6 +714,7 @@ label.marca{
   .bus-fila{grid-template-columns:1fr}
   .opciones--mini .opcion{flex:1 1 0}
   .desplegable .lista{grid-template-columns:1fr}
+  .boton-linea{padding:10px 8px;gap:7px;letter-spacing:.12em}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -682,6 +725,25 @@ label.marca{
 </style>
 
 <button id="musica" aria-label="Música" aria-pressed="false"><b></b><b></b></button>
+
+<!-- ══ ICONOS ══ se usan con <svg class="icono"><use href="#i-…"/></svg> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-iglesia" viewBox="0 0 48 48"><path d="M24 2.5v6M21.4 5h5.2"/><path d="M24 8.5 19 22h10Z"/><path d="M21.2 16.2h5.6"/><path d="M19 22v23M29 22v23"/><path d="M19 29.5 9.5 34v11M29 29.5l9.5 4.5v11"/><path d="M5.5 45h37"/><circle cx="24" cy="27.4" r="2.2"/><path d="M21.6 45v-6.2a2.4 2.4 0 0 1 4.8 0V45"/><path d="M13 41v-2.6a1 1 0 0 1 2 0V41M33 41v-2.6a1 1 0 0 1 2 0V41"/></symbol>
+  <symbol id="i-brindis" viewBox="0 0 48 48"><g transform="rotate(9 15 40)"><path d="M10 9h10c0 5.6-1.2 10-5 11-3.8-1-5-5.4-5-11Z"/><path d="M10.4 13.2h9.2"/><path d="M15 20v18.6"/><path d="M10.5 39.4q4.5-1.6 9 0"/></g><g transform="rotate(-9 33 40)"><path d="M28 9h10c0 5.6-1.2 10-5 11-3.8-1-5-5.4-5-11Z"/><path d="M28.4 13.2h9.2"/><path d="M33 20v18.6"/><path d="M28.5 39.4q4.5-1.6 9 0"/></g><path d="M24 1.8v3.2M19.6 3.4l1.6 2.2M28.4 3.4l-1.6 2.2"/></symbol>
+  <symbol id="i-autobus" viewBox="0 0 48 48"><rect x="10" y="5" width="28" height="33" rx="5"/><rect x="17" y="8.2" width="14" height="3.2" rx="1"/><rect x="13.2" y="14.2" width="21.6" height="11.4" rx="1.6"/><path d="M24 14.2v11.4"/><circle cx="15.8" cy="31.6" r="2"/><circle cx="32.2" cy="31.6" r="2"/><path d="M21 31h6M21 33.6h6"/><path d="M10 15.5H7.6v6M38 15.5h2.4v6"/><path d="M13.6 38v4.4a1.6 1.6 0 0 0 1.6 1.6h2a1.6 1.6 0 0 0 1.6-1.6V38M29.2 38v4.4a1.6 1.6 0 0 0 1.6 1.6h2a1.6 1.6 0 0 0 1.6-1.6V38"/></symbol>
+  <symbol id="i-anillos" viewBox="0 0 48 48"><circle cx="18" cy="32" r="10.5"/><circle cx="18" cy="32" r="8.4"/><circle cx="29.5" cy="28" r="10.5"/><circle cx="29.5" cy="28" r="8.4"/><path d="M26.3 9.4h6.4l2.4 2.6-5.6 5.5-5.6-5.5Z"/><path d="M23.9 12h11.2M28.1 9.4l1.4 2.6 1.4-2.6M29.5 12v5.5"/><path d="M37.6 6.6l1.6-1.6M39.4 10.6h2.2M21.4 6.6l-1.6-1.6"/></symbol>
+  <symbol id="i-vino" viewBox="0 0 48 48"><path d="M15.2 4h3.6v9c0 2.4 4.2 3.6 4.2 7.6V44a1 1 0 0 1-1 1H12a1 1 0 0 1-1-1V20.6c0-4 4.2-5.2 4.2-7.6Z"/><path d="M15.2 7.2h3.6"/><rect x="13.4" y="27" width="7.2" height="9" rx=".6"/><path d="M15.4 30.4h3.2M15.4 32.8h3.2"/><path d="M28.5 21h11c0 6-1.4 10-5.5 11-4.1-1-5.5-5-5.5-11Z"/><path d="M28.9 25.4h10.2"/><path d="M34 32v11.6"/><path d="M29.5 44.6q4.5-1.6 9 0"/></symbol>
+  <symbol id="i-coctel" viewBox="0 0 48 48"><path d="M5.5 10h31L21 26.5Z"/><path d="M10.2 15h21.6"/><path d="M21 26.5v15.8"/><path d="M14 44q7-2.2 14 0"/><path d="M13.2 4.4 25 19"/><circle cx="23" cy="16.6" r="2.3"/><path d="M32 10a5 5 0 0 1 10 0"/><path d="M33.6 10a3.4 3.4 0 0 1 6.8 0"/><path d="M37 10V6.6M37 10l2.4-2.3M37 10l-2.4-2.3"/></symbol>
+  <symbol id="i-banquete" viewBox="0 0 48 48"><circle cx="24" cy="25" r="12.5"/><circle cx="24" cy="25" r="8.8"/><path d="M19.6 20.2a6.6 6.6 0 0 1 4-2"/><path d="M4 5.5v8.5M6.6 5.5v8.5M9.2 5.5v8.5"/><path d="M4 14c0 2.6 1.2 3.8 2.6 3.8s2.6-1.2 2.6-3.8"/><path d="M6.6 17.8V43"/><path d="M42.2 43V5.5c-3 2-4.4 7-4.4 12.2v4.2a1.6 1.6 0 0 0 1.6 1.6h2.8"/></symbol>
+  <symbol id="i-fiesta" viewBox="0 0 48 48"><path d="M5.5 43.5 14 19l15.5 15.5Z"/><path d="M9.2 33.2l6.6 6.6M11.8 25.8l11.4 11.4"/><path d="M23.6 24.4l5-7.2M26.8 27.6l7.6-4.4"/><path d="M19.8 16.4c-.4-3.8 2.8-5 2.4-9.2M32.2 29.4c3.8.6 5.4-2.6 9.4-2"/><circle cx="33.4" cy="11" r="1.3"/><circle cx="40.2" cy="19.6" r="1.3"/><circle cx="27.6" cy="6.2" r="1"/><path d="M38 3.6v4.4M35.8 5.8h4.4M42.4 34v3.4M40.7 35.7h3.4"/></symbol>
+  <symbol id="i-traje" viewBox="0 0 48 48"><path d="M17 6 8 10.5A3.6 3.6 0 0 0 6 13.7L5 42h38l-1-28.3a3.6 3.6 0 0 0-2-3.2L31 6"/><path d="M12.5 15 13.4 42M35.5 15 34.6 42"/><path d="M17 6l7 10 7-10"/><path d="M17 6l3 18.5 4 5.5 4-5.5L31 6"/><path d="M24 30l-4 12M24 30l4 12"/><path d="M22.4 16h3.2l-.6 2.5h-2Z"/><path d="M23 18.5l-1.4 7 2.4 2.8 2.4-2.8-1.4-7"/><path d="M30.6 21.4h4.6M31 21.4l1-2 1 1.4 1-1.6.8 2.2"/><path d="M9.6 33.5h5.6M32.8 33.5h5.6"/><circle cx="24" cy="31.8" r=".7"/></symbol>
+  <symbol id="i-vestido" viewBox="0 0 48 48"><path d="M18 3.5v7.5M30 3.5v7.5"/><path d="M18 11c1.6 2.4 3.6 3.6 6 3.6s4.4-1.2 6-3.6l-1 10H19Z"/><path d="M19 21h10v2.6H19Z"/><path d="M19 23.6C17 31 12.5 38 8 44.4q4-1.6 8 0t8 0 8 0 8 0c-4.5-6.4-9-13.4-11-20.8"/><path d="M22 26.4l-3.6 17.2M26 26.4l3.6 17.2M24 26v18.4"/><circle cx="24" cy="22.3" r=".6"/></symbol>
+  <symbol id="i-chaque" viewBox="0 0 48 48"><path d="M17 6 8 10.5A3.6 3.6 0 0 0 6 13.7L5.4 44h7.2L14 30"/><path d="M31 6l9 4.5a3.6 3.6 0 0 1 2 3.2l.6 30.3h-7.2L34 30"/><path d="M12.5 15l.8 14.6M35.5 15l-.8 14.6"/><path d="M17 6l7 9.4L31 6"/><path d="M17 6l3 16 4 5 4-5 3-16"/><path d="M24 27q-5 1.6-10 3M24 27q5 1.6 10 3"/><path d="M20.4 27.8 21.4 35l2.6-2 2.6 2 1-7.2"/><path d="M22.4 15.4h3.2l-.6 2.4h-2Z"/><path d="M23 17.8l-1 4.6 2 2.2 2-2.2-1-4.6"/><circle cx="24" cy="27.2" r=".7"/></symbol>
+  <symbol id="i-edificio" viewBox="0 0 48 48"><path d="M10 44V8h20v36"/><path d="M8.4 8h23.2"/><path d="M30 18h9v26"/><path d="M5 44h38"/><rect x="13.4" y="12" width="3.4" height="4" rx=".4"/><rect x="23.2" y="12" width="3.4" height="4" rx=".4"/><rect x="13.4" y="19.4" width="3.4" height="4" rx=".4"/><rect x="23.2" y="19.4" width="3.4" height="4" rx=".4"/><rect x="13.4" y="26.8" width="3.4" height="4" rx=".4"/><rect x="23.2" y="26.8" width="3.4" height="4" rx=".4"/><path d="M33.4 23h2.4M33.4 29h2.4M33.4 35h2.4"/><path d="M16.8 44v-5.8h6.4V44"/><path d="M15 38.2h10"/><path d="M20 38.2V44"/></symbol>
+  <symbol id="i-coche" viewBox="0 0 48 48"><path d="M7 33v-6.4l4.2-10.2a3 3 0 0 1 2.8-1.9h20a3 3 0 0 1 2.8 1.9L41 26.6V33a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2Z"/><path d="M11.6 25.4l3-7.2h18.8l3 7.2Z"/><circle cx="13.4" cy="29.6" r="1.9"/><circle cx="34.6" cy="29.6" r="1.9"/><path d="M20 29h8M20 31.4h8"/><path d="M7.6 23H4.8M40.4 23h2.8"/><path d="M10 35v3.4a1.6 1.6 0 0 0 1.6 1.6h2.6a1.6 1.6 0 0 0 1.6-1.6V35M32.2 35v3.4a1.6 1.6 0 0 0 1.6 1.6h2.6a1.6 1.6 0 0 0 1.6-1.6V35"/></symbol>
+  <symbol id="i-web" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><ellipse cx="24" cy="24" rx="8" ry="18"/><path d="M6 24h36M8.4 15h31.2M8.4 33h31.2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 48 48"><path d="M24 44c-8.6-9.4-13.4-16-13.4-22.6a13.4 13.4 0 0 1 26.8 0C37.4 28 32.6 34.6 24 44Z"/><circle cx="24" cy="21.4" r="4.8"/></symbol>
+</svg>
 
 <!-- ══ MENÚ ══ -->
 <button id="menu-boton" aria-expanded="false" aria-controls="menu" hidden><span class="lineas" aria-hidden="true"></span><span id="menu-texto">Menú</span></button>
@@ -749,11 +811,7 @@ label.marca{
     <div class="retrato aparece">
       <div class="pase" id="pase">
         <img class="diapo activa" src="fotos/pedida.jpg" alt="Adriana y Pablo el día de la pedida" style="object-position:center 62%">
-        <img class="diapo" src="fotos/muro.jpg" alt="Adriana y Pablo de boda" style="object-position:center 72%">
-        <img class="diapo" src="fotos/calle.jpg" alt="Adriana y Pablo de paseo" style="object-position:center 82%">
-        <img class="diapo" src="fotos/campo.jpg" alt="Adriana y Pablo en el campo" style="object-position:center 38%">
         <img class="diapo" src="fotos/sagrada.jpg" alt="Adriana y Pablo frente a la Sagrada Familia" style="object-position:center 72%">
-        <img class="diapo" src="fotos/noche.jpg" alt="Adriana y Pablo una noche de invierno" style="object-position:center 46%">
         <img class="diapo" src="fotos/rojo.jpg" alt="Adriana y Pablo, un selfi" style="object-position:center 30%">
         <img class="diapo" src="fotos/jardin.jpg" alt="Adriana y Pablo en un jardín" style="object-position:center 50%">
       </div>
@@ -794,13 +852,13 @@ label.marca{
     <div class="interior">
       <div class="sitios aparece">
         <div class="sitio">
-          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6v3.9M10.3 3.3h3.4"/><path d="M7 10.2 12 5.6l5 4.6"/><path d="M7 10.2V21h10V10.2"/><path d="M5.2 21h13.6"/><path d="M10.3 21v-3.4a1.7 1.7 0 0 1 3.4 0V21"/><path d="M12 12.1v2M11 13.1h2"/></svg>
+          <svg class="icono" aria-hidden="true"><use href="#i-iglesia"/></svg>
           <span class="titulo">Ceremonia</span>
           <span class="direccion">Iglesia Imperial de Santa María de Palacio,<br>Logroño, La Rioja.</span>
           <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Iglesia+Imperial+de+Santa+Mar%C3%ADa+de+Palacio%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
         </div>
         <div class="sitio">
-          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 3.7 9.6 5.2 7.2 12Z"/><path d="M7.2 12 9.4 17.5"/><path d="M7.5 18.4l4.1-1"/><path d="M20.8 3.7 14.4 5.2 16.8 12Z"/><path d="M16.8 12 14.6 17.5"/><path d="M16.5 18.4l-4.1-1"/></svg>
+          <svg class="icono" aria-hidden="true"><use href="#i-brindis"/></svg>
           <span class="titulo">Celebración</span>
           <span class="direccion">Bodegas Proelio,<br>Nalda, La Rioja.</span>
           <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Bodegas+Proelio%2C+Nalda" target="_blank" rel="noopener">Ver mapa</a>
@@ -808,7 +866,7 @@ label.marca{
       </div>
       <div class="filete aparece"></div>
       <div class="buses aparece">
-        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.8" width="14" height="15.4" rx="2.6"/><path d="M5 7h14M5 11.6h14"/><circle cx="8.6" cy="14.6" r=".9"/><circle cx="15.4" cy="14.6" r=".9"/><path d="M7.6 18.2v2.4M16.4 18.2v2.4"/></svg>
+        <svg class="icono" aria-hidden="true"><use href="#i-autobus"/></svg>
         <span class="titulo">Autobuses</span>
         <div class="trayectos">
           <div class="trayecto">
@@ -837,15 +895,15 @@ label.marca{
       <p class="rotulo aparece">Itinerario</p>
       <div class="filete aparece"></div>
       <ul class="agenda">
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">11:30</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="14.2" r="5.6"/><circle cx="15.4" cy="11.4" r="4.9"/><path d="m15.4 3.1 1.7 2-1.7 2-1.7-2Z"/></svg><span class="hora">12:30</span></span><span class="raya"></span><span class="que">Ceremonia</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">14:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.4h9.6l-.8 5.6a4 4 0 0 1-8 0Z"/><path d="M12 13v6"/><path d="M8.6 19.6h6.8"/></svg><span class="hora">14:30</span></span><span class="raya"></span><span class="que">Llegada a Bodegas Proelio</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 4.6h16.4L12 13.2Z"/><path d="M12 13.2v5.4"/><path d="M8.4 19.2h7.2"/><circle cx="15.6" cy="7.6" r=".9"/></svg><span class="hora">14:30 – 16:30</span></span><span class="raya"></span><span class="que">Cóctel de bienvenida</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.4" r="5.8"/><circle cx="12" cy="12.4" r="2.6"/><path d="M4 3.6v3.8a1.5 1.5 0 0 0 3 0V3.6M5.5 7.4V20"/><path d="M19.4 3.6c1.4 0 2.1 1.9 2.1 3.8s-.7 3-2.1 3Zm0 7.2V20"/></svg><span class="hora">16:30 – 18:30</span></span><span class="raya"></span><span class="que">Banquete</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 7.8 9.4l6.8 6.8Z"/><path d="m8.6 11.4 4 4"/><path d="M14.4 3.4v2.2M19.8 6.2l-1.6 1.5M21 12.2l-2.2.3M17.4 16.6l1.9 1.2"/><circle cx="17.6" cy="11" r=".75"/></svg><span class="hora">18:30 – 01:00</span></span><span class="raya"></span><span class="que">Fiesta</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">22:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
-          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">01:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-autobus"/></svg><span class="hora">11:30</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-anillos"/></svg><span class="hora">12:30</span></span><span class="raya"></span><span class="que">Ceremonia</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-autobus"/></svg><span class="hora">14:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-vino"/></svg><span class="hora">14:30</span></span><span class="raya"></span><span class="que">Llegada a Bodegas Proelio</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-coctel"/></svg><span class="hora">14:30 – 16:30</span></span><span class="raya"></span><span class="que">Cóctel de bienvenida</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-banquete"/></svg><span class="hora">16:30 – 18:30</span></span><span class="raya"></span><span class="que">Banquete</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-fiesta"/></svg><span class="hora">18:30 – 01:00</span></span><span class="raya"></span><span class="que">Fiesta</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-autobus"/></svg><span class="hora">22:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" aria-hidden="true"><use href="#i-autobus"/></svg><span class="hora">01:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
       </ul>
     </div>
   </div>
@@ -864,18 +922,21 @@ label.marca{
 
       <div class="hoteles">
         <article class="hotel aparece">
-          <p class="hotel-nombre">Hotel Ciudad de Logroño <span>3*</span></p>
-          <div class="dato-hotel">
-            <span class="etiqueta">Código de descuento</span>
-            <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
-          </div>
-          <div class="botones">
-            <a class="boton-mapa" href="https://www.ciudadlogrono.com/enlaces/boda-adriana-pablo/" target="_blank" rel="noopener">Web</a>
-            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Ciudad+de+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <figure class="hotel-foto"><img src="fotos/hoteles/ciudad.jpg" alt="Hotel Ciudad de Logroño" loading="lazy"></figure>
+          <div class="hotel-info">
+            <p class="hotel-nombre">Hotel Ciudad de Logroño<span class="estrellas" aria-label="3 estrellas">★★★</span></p>
+            <div class="dato-hotel">
+              <span class="etiqueta">Código de descuento</span>
+              <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
+            </div>
+            <div class="botones">
+              <a class="boton-linea" href="https://www.ciudadlogrono.com/enlaces/boda-adriana-pablo/" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-web"/></svg>Web</a>
+              <a class="boton-linea" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Ciudad+de+Logro%C3%B1o" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-pin"/></svg>Ver mapa</a>
+            </div>
           </div>
           <div class="detalles">
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4.5h9V21"/><path d="M14 9h5v12"/><path d="M3.5 21h17"/><path d="M7.6 7.6h1.2M10.4 7.6h1.2M7.6 10.8h1.2M10.4 10.8h1.2M7.6 14h1.2M10.4 14h1.2M16 12.4h1M16 15.4h1"/><path d="M8.4 21v-3.2h2.4V21"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-edificio"/></svg>
               <div>
                 <p class="etiqueta">Condiciones</p>
                 <p>El hotel ha habilitado una página exclusiva para nuestra boda, desde la que podréis realizar vuestra reserva con los descuentos aplicados automáticamente.</p>
@@ -883,7 +944,7 @@ label.marca{
               </div>
             </div>
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-coche"/></svg>
               <div>
                 <p class="etiqueta">Parking</p>
                 <p>El hotel dispone de aparcamiento privado.<br>Precio: 13,20 euros / día.<br>Es necesario reservar previamente.</p>
@@ -893,18 +954,21 @@ label.marca{
         </article>
 
         <article class="hotel aparece">
-          <p class="hotel-nombre">Hotel Carlton <span>4*</span></p>
-          <div class="dato-hotel">
-            <span class="etiqueta">Código de descuento</span>
-            <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
-          </div>
-          <div class="botones">
-            <a class="boton-mapa" href="https://www.carltonrioja.com/enlaces/boda-adriana-y-pablo/" target="_blank" rel="noopener">Web</a>
-            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Carlton+Rioja%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <figure class="hotel-foto"><img src="fotos/hoteles/carlton.jpg" alt="Hotel Carlton" loading="lazy"></figure>
+          <div class="hotel-info">
+            <p class="hotel-nombre">Hotel Carlton<span class="estrellas" aria-label="4 estrellas">★★★★</span></p>
+            <div class="dato-hotel">
+              <span class="etiqueta">Código de descuento</span>
+              <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
+            </div>
+            <div class="botones">
+              <a class="boton-linea" href="https://www.carltonrioja.com/enlaces/boda-adriana-y-pablo/" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-web"/></svg>Web</a>
+              <a class="boton-linea" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Carlton+Rioja%2C+Logro%C3%B1o" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-pin"/></svg>Ver mapa</a>
+            </div>
           </div>
           <div class="detalles">
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4.5h9V21"/><path d="M14 9h5v12"/><path d="M3.5 21h17"/><path d="M7.6 7.6h1.2M10.4 7.6h1.2M7.6 10.8h1.2M10.4 10.8h1.2M7.6 14h1.2M10.4 14h1.2M16 12.4h1M16 15.4h1"/><path d="M8.4 21v-3.2h2.4V21"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-edificio"/></svg>
               <div>
                 <p class="etiqueta">Condiciones</p>
                 <p>El hotel ha habilitado una página exclusiva para nuestra boda, desde la que podréis realizar vuestra reserva con los descuentos aplicados automáticamente.</p>
@@ -912,19 +976,19 @@ label.marca{
               </div>
             </div>
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-coche"/></svg>
               <div>
                 <p class="etiqueta">Parking privado</p>
                 <p>Precio: 20 euros / día.<br>No se realizan reservas previas. Sujeto a disponibilidad.</p>
               </div>
             </div>
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-coche"/></svg>
               <div>
                 <p class="etiqueta">Parking La Paz</p>
                 <p>Acuerdo cerrado con el hotel.<br>Precio: 10 euros / día.</p>
                 <div class="botones">
-                  <a class="boton-mapa" href="https://apk2gestion.com/es/reserva-rotacion/parking/la-paz" target="_blank" rel="noopener">Web</a>
+                  <a class="boton-linea" href="https://apk2gestion.com/es/reserva-rotacion/parking/la-paz" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-web"/></svg>Web</a>
                 </div>
               </div>
             </div>
@@ -932,18 +996,21 @@ label.marca{
         </article>
 
         <article class="hotel aparece">
-          <p class="hotel-nombre">Hotel Eurostars Ruavieja Logroño <span>4*</span></p>
-          <div class="dato-hotel">
-            <span class="etiqueta">Código de descuento</span>
-            <button type="button" class="codigo" data-copiar="BODAAYP">BODAAYP <small>Copiar</small></button>
-          </div>
-          <div class="botones">
-            <a class="boton-mapa" href="https://www.eurostarshotels.com/eurostars-fuerte-ruavieja.html" target="_blank" rel="noopener">Web</a>
-            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Eurostars+Fuerte+Ruavieja%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <figure class="hotel-foto"><img src="fotos/hoteles/eurostars.jpg" alt="Hotel Eurostars Ruavieja" loading="lazy"></figure>
+          <div class="hotel-info">
+            <p class="hotel-nombre">Hotel Eurostars Ruavieja Logroño<span class="estrellas" aria-label="4 estrellas">★★★★</span></p>
+            <div class="dato-hotel">
+              <span class="etiqueta">Código de descuento</span>
+              <button type="button" class="codigo" data-copiar="BODAAYP">BODAAYP <small>Copiar</small></button>
+            </div>
+            <div class="botones">
+              <a class="boton-linea" href="https://www.eurostarshotels.com/eurostars-fuerte-ruavieja.html" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-web"/></svg>Web</a>
+              <a class="boton-linea" href="https://www.google.com/maps/search/?api=1&amp;query=Eurostars+Fuerte+Ruavieja%2C+Logro%C3%B1o" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-pin"/></svg>Ver mapa</a>
+            </div>
           </div>
           <div class="detalles">
             <div class="detalle">
-              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <svg class="icono" aria-hidden="true"><use href="#i-coche"/></svg>
               <div>
                 <p class="etiqueta">Parking privado</p>
                 <p>Precio: 18 euros / día.<br>Es necesario reservar previamente.</p>
@@ -953,14 +1020,17 @@ label.marca{
         </article>
 
         <article class="hotel aparece">
-          <p class="hotel-nombre">Hotel FG Logroño <span>3*</span></p>
-          <div class="dato-hotel">
-            <span class="etiqueta">Código de descuento</span>
-            <p>Aunque no contamos con un código de descuento específico para este hotel, os recomendamos consultar su web, donde encontraréis promociones y ofertas habituales.</p>
-          </div>
-          <div class="botones">
-            <a class="boton-mapa" href="https://fg-logrono.bookstaygo.com/es/special-offers-coupons" target="_blank" rel="noopener">Web</a>
-            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+FG+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <figure class="hotel-foto"><img src="fotos/hoteles/fg.jpg" alt="Hotel FG Logroño" loading="lazy"></figure>
+          <div class="hotel-info">
+            <p class="hotel-nombre">Hotel FG Logroño<span class="estrellas" aria-label="3 estrellas">★★★</span></p>
+            <div class="dato-hotel">
+              <span class="etiqueta">Código de descuento</span>
+              <p>Aunque no contamos con un código de descuento específico para este hotel, os recomendamos consultar su web, donde encontraréis promociones y ofertas habituales.</p>
+            </div>
+            <div class="botones">
+              <a class="boton-linea" href="https://fg-logrono.bookstaygo.com/es/special-offers-coupons" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-web"/></svg>Web</a>
+              <a class="boton-linea" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+FG+Logro%C3%B1o" target="_blank" rel="noopener"><svg class="icono" aria-hidden="true"><use href="#i-pin"/></svg>Ver mapa</a>
+            </div>
           </div>
         </article>
       </div>
@@ -984,7 +1054,7 @@ label.marca{
 
       <div class="vestuario aparece">
         <div class="atuendo">
-          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3.4 4.6 5.4 4 20.6h16l-.6-15.2-3.6-2"/><path d="M8.2 3.4 9.8 11.6 12 8.2l2.2 3.4 1.6-8.2"/><path d="M9.6 3.4 12 7l2.4-3.6"/><path d="m12 8.2-.8 1.2.8 4.2.8-4.2Z"/><path d="M12 15v5.6"/></svg>
+          <svg class="icono" aria-hidden="true"><use href="#i-traje"/></svg>
           <p class="atuendo-titulo">Hombres</p>
           <p class="prendas">Traje con corbata<br>Zapatos de vestir</p>
           <div class="raya-corta"></div>
@@ -993,7 +1063,7 @@ label.marca{
         </div>
         <div class="divisoria"></div>
         <div class="atuendo">
-          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.6 2.6v3.6M14.4 2.6v3.6"/><path d="M9.6 6.2c.6 1.1 1.4 1.6 2.4 1.6s1.8-.5 2.4-1.6l.4 4.4H9.2Z"/><path d="M9.2 10.6 5 21h14l-4.2-10.4"/></svg>
+          <svg class="icono" aria-hidden="true"><use href="#i-vestido"/></svg>
           <p class="atuendo-titulo">Mujeres</p>
           <p class="prendas">Vestido o conjunto de invitada de día<br>Calzado de vestir</p>
           <div class="raya-corta"></div>
@@ -1003,7 +1073,7 @@ label.marca{
       </div>
 
       <div class="atuendo atuendo--solo aparece">
-        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3.4 4.6 5.4 4.2 21h3.4l1.2-7.6 3.2-1.4 3.2 1.4 1.2 7.6h3.4l-.4-15.6-3.6-2"/><path d="M8.2 3.4 9.8 11.6 12 8.2l2.2 3.4 1.6-8.2"/><path d="M9.6 3.4 12 7l2.4-3.6"/><path d="m12 8.2-.8 1.2.8 2.6.8-2.6Z"/></svg>
+        <svg class="icono" aria-hidden="true"><use href="#i-chaque"/></svg>
         <p class="atuendo-titulo">Testigos masculinos</p>
         <p class="prendas">Chaqué<br>Zapatos Oxford</p>
         <div class="raya-corta"></div>
@@ -1041,8 +1111,8 @@ label.marca{
     </div>
   </div>
 
-  <div class="sangre" data-falta="fotos/campo.jpg">
-    <img class="foto ancho-campo" src="fotos/campo.jpg" alt="Adriana y Pablo en el campo" loading="lazy">
+  <div class="sangre" data-falta="fotos/calle.jpg">
+    <img class="foto" src="fotos/calle.jpg" alt="Adriana y Pablo de paseo" loading="lazy" style="object-position:center 56%">
   </div>
 
   <!-- Confirmar asistencia -->
