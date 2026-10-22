@@ -1,15 +1,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pablo &amp; Adri</title>
+<title>Adriana &amp; Pablo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,400&display=swap">
 
 <!-- ═══════════════════════════════════════════════════════════════
      CONFIGURACIÓN — todo lo editable está al principio del <script>:
-       IBAN        → cuenta para el regalo (⚠ hay un marcador)
+       CORREO_RSVP → buzón que recibe las confirmaciones (vía FormSubmit)
+       IBAN        → cuenta para el regalo
      Carpetas que necesita:
-       fotos/   pedida.jpg  muro.jpg  campo.jpg  noche.jpg  (ese es el orden)
+       fotos/   pedida.jpg  muro.jpg  campo.jpg  noche.jpg  calle.jpg
+                sagrada.jpg  rojo.jpg  jardin.jpg  logrono.jpg
        assets/  lacre.png  tex-lados.png  tex-sup.png  tex-inf.png
                 sombra-sup.png  sombra-inf.png
        musica/  cancion.mp3  (opcional: sin él, el botón no aparece)
@@ -104,6 +106,53 @@ a{color:inherit}
 #musica.sonando b:nth-child(2){animation:baila 1s ease-in-out .3s infinite}
 @keyframes baila{0%,100%{height:15px}50%{height:7px}}
 #musica:focus-visible{outline:1px solid var(--texto);outline-offset:4px}
+
+/* ══ MENÚ ═══════════════════════════════════════════════════════ */
+/* por debajo de la capa del sobre: sólo se ve una vez abierta la invitación */
+#menu-boton{
+  position:fixed;top:14px;right:14px;z-index:97;
+  display:flex;align-items:center;gap:11px;
+  padding:11px 14px;
+  background:rgba(238,238,238,.9);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1px solid var(--linea);
+  font-family:var(--display);font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--texto);cursor:pointer;
+}
+#menu-boton[hidden]{display:none}
+#menu-boton:focus-visible{outline:1px solid var(--hueso);outline-offset:3px}
+#menu-boton .lineas{position:relative;width:18px;height:9px}
+#menu-boton .lineas::before,#menu-boton .lineas::after{
+  content:"";position:absolute;left:0;right:0;height:1px;background:currentColor;
+  transition:transform .35s ease,top .35s ease;
+}
+#menu-boton .lineas::before{top:0}
+#menu-boton .lineas::after{top:8px}
+body.menu-abierto{overflow:hidden}
+body.menu-abierto #menu-boton .lineas::before{top:4px;transform:rotate(45deg)}
+body.menu-abierto #menu-boton .lineas::after{top:4px;transform:rotate(-45deg)}
+
+#menu{
+  position:fixed;inset:0;z-index:96;
+  display:flex;align-items:center;justify-content:center;
+  padding:84px 24px 48px;overflow-y:auto;
+  background:var(--negro);color:var(--hueso);
+  opacity:0;visibility:hidden;
+  transition:opacity .45s ease,visibility 0s linear .45s;
+}
+body.menu-abierto #menu{opacity:1;visibility:visible;transition:opacity .45s ease}
+#menu ol{
+  list-style:none;margin:auto 0;padding:0;
+  display:flex;flex-direction:column;align-items:center;
+  gap:clamp(14px,3.2vh,24px);text-align:center;
+}
+#menu a{
+  font-family:var(--display);font-size:clamp(17px,4.8vw,22px);
+  letter-spacing:.16em;text-transform:uppercase;line-height:1.3;
+  text-decoration:none;opacity:.78;transition:opacity .3s ease;
+}
+#menu a:hover,#menu a:focus-visible{opacity:1}
+#menu a:focus-visible{outline:1px solid var(--hueso);outline-offset:6px}
 
 /* ══ PANTALLA DEL SOBRE ═════════════════════════════════════════ */
 #sobre-capa{
@@ -277,16 +326,76 @@ a{color:inherit}
 
 /* formulario */
 form{display:flex;flex-direction:column;gap:22px;width:100%;text-align:left}
+form[hidden]{display:none}
 .campo{display:flex;flex-direction:column;gap:8px}
+.campo[hidden]{display:none}
 label,.rotulo-campo{font-family:var(--display);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--texto-tenue)}
 input[type=text],textarea,select{
   font-family:var(--lectura);font-size:16px;color:var(--texto);
-  background:transparent;border:0;border-bottom:1px solid var(--linea);
-  padding:9px 2px;border-radius:0;width:100%;appearance:none;
+  background:rgba(255,255,255,.35);border:1px solid var(--linea);
+  padding:12px 16px;border-radius:0;width:100%;appearance:none;
+}
+select{
+  cursor:pointer;padding-right:44px;
+  background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%231c1a1a%22 stroke-width=%221.4%22><path d=%22m6 9 6 6 6-6%22/></svg>');
+  background-repeat:no-repeat;background-position:right 14px center;background-size:16px;
 }
 textarea{resize:vertical;min-height:64px;line-height:1.55}
 input::placeholder,textarea::placeholder{color:#a9a6a4;font-style:italic}
-input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--texto)}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--texto)}
+input[type=text][hidden]{display:none}
+
+/* desplegable de varias opciones (restricciones alimenticias) */
+.desplegable{border:1px solid var(--linea);background:rgba(255,255,255,.35)}
+.desplegable[open]{border-color:var(--texto)}
+.desplegable summary{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;
+  font-family:var(--lectura);font-size:16px;line-height:1.45;color:var(--texto);
+}
+.desplegable summary::-webkit-details-marker{display:none}
+.desplegable summary:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
+.desplegable .flecha{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.4;transition:transform .3s ease}
+.desplegable[open] .flecha{transform:rotate(180deg)}
+.desplegable .lista{
+  display:grid;grid-template-columns:1fr 1fr;gap:0 18px;
+  padding:8px 16px 12px;border-top:1px solid var(--linea);
+}
+label.marca{
+  display:flex;align-items:center;gap:11px;padding:8px 0;cursor:pointer;
+  font-family:var(--lectura);font-size:15px;letter-spacing:0;text-transform:none;color:var(--texto);
+}
+.marca input{
+  appearance:none;margin:0;flex:none;cursor:pointer;
+  width:16px;height:16px;border:1px solid var(--texto-tenue);
+  display:grid;place-content:center;
+}
+.marca input:checked{background:var(--negro);border-color:var(--negro)}
+.marca input:checked::after{
+  content:"";width:8px;height:4px;
+  border:solid var(--hueso);border-width:0 0 1.5px 1.5px;
+  transform:translateY(-1px) rotate(-45deg);
+}
+.marca input:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
+
+.tallas{display:flex;flex-wrap:wrap;gap:6px}
+.tallas select{flex:1 1 180px}
+
+/* autobuses dentro del formulario */
+.form-buses{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:10px;padding-top:30px;border-top:1px solid var(--linea)}
+.form-buses .titulo-form{font-family:var(--display);font-size:clamp(17px,4.6vw,20px);letter-spacing:.14em;text-transform:uppercase;line-height:1.3}
+.bus-filas{width:100%;margin-top:6px}
+.bus-fila{
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px 22px;
+  padding:16px 0;border-bottom:1px solid var(--linea);
+}
+.bus-fila:last-child{border-bottom:0}
+.bus-titulo{display:block;font-family:var(--display);font-size:12px;letter-spacing:.2em;text-transform:uppercase;line-height:1.5}
+.bus-detalle{display:block;margin-top:4px;font-size:14px;line-height:1.45;color:var(--texto-tenue)}
+.opciones--mini{flex-wrap:nowrap}
+.opciones--mini .opcion{flex:0 0 78px}
+.opciones--mini .opcion span{padding:11px 6px}
 
 .opciones{display:flex;gap:6px;flex-wrap:wrap}
 .opcion{flex:1 1 140px;position:relative}
@@ -391,22 +500,96 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 .boton-mapa:hover{opacity:.78}
 .boton-mapa:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
 
+/* autobuses, debajo de ceremonia y celebración */
+.buses{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.buses .titulo{
+  font-family:var(--display);
+  font-size:clamp(17px,4.6vw,21px);
+  line-height:1.3em;text-transform:uppercase;letter-spacing:.06em;
+  margin-top:2px;
+}
+.trayectos{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:14px}
+.trayecto{display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px clamp(10px,2.4vw,22px)}
+.trayecto+.trayecto{border-left:1px solid var(--linea)}
+.trayecto .versal{font-size:12px;line-height:1.7}
+.trayecto .hora-bus{font-family:var(--display);font-size:clamp(20px,5.4vw,24px);line-height:1.3;font-variant-numeric:tabular-nums}
+.trayecto .direccion{font-size:15px;color:var(--texto-suave);line-height:1.45}
+@media (max-width:640px){
+  .trayectos{grid-template-columns:1fr;gap:0}
+  .trayecto{padding:20px 0}
+  .trayecto+.trayecto{border-left:0;border-top:1px solid var(--linea)}
+}
+
 /* ── Itinerario ────────────────────────────────────────────────── */
+/* tres columnas simétricas: la raya cae justo en el centro, debajo del filete */
 .agenda{
-  list-style:none;margin:0 auto;padding:0;
-  width:fit-content;max-width:100%;
+  list-style:none;margin:0;padding:0;
+  width:100%;max-width:580px;
   display:flex;flex-direction:column;gap:clamp(20px,4.4vw,28px);
-  text-align:left;
 }
 .agenda li{
   display:grid;
-  grid-template-columns:31px minmax(84px,auto) 26px 1fr;
+  grid-template-columns:minmax(0,1fr) 30px minmax(0,1fr);
   align-items:center;
-  gap:clamp(10px,3vw,18px);
+  gap:clamp(10px,2.6vw,16px);
 }
-.agenda .hora{font-family:var(--lectura);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.agenda .cuando{display:flex;align-items:center;justify-content:flex-end;gap:clamp(10px,3vw,18px)}
+.agenda .hora{font-family:var(--lectura);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:6.6em;text-align:center}
 .agenda .raya{height:1px;background:rgba(238,238,238,.55)}
-.agenda .que{font-family:var(--lectura);font-size:15px;line-height:1.35}
+.agenda .que{font-family:var(--lectura);font-size:15px;line-height:1.35;text-align:left}
+
+/* ── Alojamiento ───────────────────────────────────────────────── */
+.interior.ancho{max-width:1040px}
+.entradilla{font-size:clamp(16px,4.2vw,18px);color:var(--texto-suave);max-width:60ch}
+.banda--negro .entradilla{color:rgba(238,238,238,.78)}
+.raya-corta{width:44px;height:1px;background:var(--linea)}
+.banda--negro .raya-corta{background:var(--linea-clara)}
+
+.hoteles{display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(30px,5vw,64px);width:100%;text-align:left;margin-top:6px}
+.hotel{display:flex;flex-direction:column;gap:20px;padding-block:clamp(28px,4vw,40px);border-top:1px solid var(--linea)}
+.hotel-nombre{font-family:var(--display);font-size:clamp(18px,4.8vw,22px);line-height:1.3;letter-spacing:.06em;text-transform:uppercase}
+.hotel-nombre span{white-space:nowrap}
+.etiqueta{font-family:var(--lectura);font-size:12px;letter-spacing:.22em;text-transform:uppercase;line-height:1.6;color:var(--texto-tenue)}
+.dato-hotel{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:15px;line-height:1.55;color:var(--texto-suave)}
+.codigo{
+  display:inline-flex;align-items:baseline;gap:14px;
+  padding:8px 14px;cursor:pointer;
+  font-family:var(--display);font-size:18px;letter-spacing:.06em;color:var(--texto);
+  background:transparent;border:1px dashed rgba(28,26,26,.38);
+  transition:background .3s,color .3s,border-color .3s;
+}
+.codigo small{font-family:var(--lectura);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--texto-tenue)}
+.codigo:hover{background:var(--negro);color:var(--hueso);border-color:var(--negro)}
+.codigo:hover small{color:rgba(238,238,238,.7)}
+.codigo:focus-visible{outline:1px solid var(--texto);outline-offset:3px}
+.botones{display:flex;flex-wrap:wrap;gap:10px}
+.botones .boton-mapa{margin-top:0}
+.detalles{display:flex;flex-direction:column;gap:20px;padding-top:20px;border-top:1px solid var(--linea)}
+.detalle{display:grid;grid-template-columns:24px 1fr;gap:14px;align-items:start;font-size:15px;line-height:1.55;color:var(--texto-suave)}
+.detalle .icono{width:24px;height:24px;margin-top:1px}
+.detalle p+p{margin-top:8px}
+.detalle b{font-weight:700;color:var(--texto)}
+.detalle .botones{margin-top:12px}
+.otras{display:flex;flex-direction:column;align-items:center;gap:clamp(18px,4.2vw,26px);padding-top:clamp(20px,4vw,34px);border-top:1px solid var(--linea);width:100%}
+@media (max-width:760px){
+  .hoteles{grid-template-columns:1fr}
+}
+
+/* ── Dress code ────────────────────────────────────────────────── */
+.rotulo--espaciado{letter-spacing:.3em}
+.vestuario{display:grid;grid-template-columns:1fr 1px 1fr;gap:clamp(22px,5vw,56px);width:100%;margin-top:10px}
+.vestuario .divisoria{background:var(--linea-clara)}
+.atuendo{display:flex;flex-direction:column;align-items:center;gap:12px}
+.atuendo .icono{width:40px;height:40px}
+.atuendo-titulo{font-family:var(--display);font-size:clamp(17px,4.6vw,21px);letter-spacing:.22em;text-transform:uppercase;line-height:1.3;margin-top:4px}
+.prendas{font-family:var(--lectura);font-size:13px;letter-spacing:.2em;text-transform:uppercase;line-height:2}
+.atuendo .raya-corta{margin-block:6px}
+.atuendo .nota{font-size:16px;line-height:1.55;color:rgba(238,238,238,.82);max-width:32ch}
+.atuendo--solo{margin-top:clamp(20px,5vw,40px)}
+@media (max-width:600px){
+  .vestuario{grid-template-columns:1fr}
+  .vestuario .divisoria{width:44px;height:1px;justify-self:center}
+}
 
 /* ── Collage: arco grande y recuadro montado encima ────────────── */
 .collage{
@@ -460,7 +643,9 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   .versal{font-size:14px;letter-spacing:.16em}
   .sitio .direccion{font-size:16px}
   .agenda .hora,.agenda .que{font-size:16px}
-  .agenda li{grid-template-columns:28px minmax(78px,auto) 18px 1fr}
+  .agenda li{grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr);gap:10px}
+  .agenda .cuando{gap:10px}
+  .agenda .hora{min-width:6.2em}
   .icono{width:42px;height:42px}
   .icono--agenda{width:28px;height:28px}
   .casilla .unidad{font-size:15px}
@@ -478,12 +663,15 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 }
 
 
-/* En móviles estrechos la raya del itinerario se come el ancho del texto */
+/* En móviles estrechos se encoge todo un poco para que la raya siga en el centro */
 @media (max-width:400px){
-  .agenda li{grid-template-columns:26px auto 1fr;gap:12px}
-  .agenda .raya{display:none}
-  .agenda .hora{font-size:15px}
-  .icono--agenda{width:26px;height:26px}
+  .agenda li{gap:8px}
+  .agenda .cuando{gap:8px}
+  .agenda .hora,.agenda .que{font-size:14px}
+  .icono--agenda{width:24px;height:24px}
+  .bus-fila{grid-template-columns:1fr}
+  .opciones--mini .opcion{flex:1 1 0}
+  .desplegable .lista{grid-template-columns:1fr}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -495,10 +683,25 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 
 <button id="musica" aria-label="Música" aria-pressed="false"><b></b><b></b></button>
 
+<!-- ══ MENÚ ══ -->
+<button id="menu-boton" aria-expanded="false" aria-controls="menu" hidden><span class="lineas" aria-hidden="true"></span><span id="menu-texto">Menú</span></button>
+<nav id="menu" aria-label="Secciones">
+  <ol>
+    <li><a href="#bienvenidos">¡Bienvenidos!</a></li>
+    <li><a href="#localizaciones">Localizaciones</a></li>
+    <li><a href="#itinerario">Itinerario</a></li>
+    <li><a href="#alojamiento">Alojamiento</a></li>
+    <li><a href="#informacion">Información adicional</a></li>
+    <li><a href="#confirmar">Confirmar asistencia</a></li>
+    <li><a href="#regalo">Regalo</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ol>
+</nav>
+
 <!-- ══ SOBRE ══ -->
 <div id="sobre-capa">
   <div class="encabezado">
-    <p class="linea-intro" id="intro">El día más importante de nuestras vidas ha llegado</p>
+    <p class="linea-intro" id="intro">El día más importante de nuestras vidas ha llegado.</p>
     <p class="grito">¡Nos casamos!</p>
   </div>
 
@@ -506,9 +709,9 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
     <span class="dorso"></span>
 
     <span class="tarjeta">
-      <span class="nombres">Pablo</span>
+      <span class="nombres">Adriana</span>
       <span class="amp">&amp;</span>
-      <span class="nombres">Adri</span>
+      <span class="nombres">Pablo</span>
       <span class="sitio">Logroño</span>
     </span>
 
@@ -523,21 +726,21 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
       <i class="textura"></i>
     </span>
 
-    <span class="llamada">Clic aquí<br>para abrir</span>
+    <span class="llamada">Haz click aquí</span>
     <span class="lacre" aria-hidden="true"></span>
   </button>
 
-  <p class="firma-sobre">Pablo &amp; Adri</p>
+  <p class="firma-sobre">Adriana &amp; Pablo</p>
 </div>
 
 <!-- ══ INVITACIÓN ══ -->
 <main id="hoja">
 
   <!-- Portada -->
-  <div class="banda">
+  <div class="banda" id="bienvenidos">
     <div class="interior" id="portada" style="padding-bottom:clamp(30px,7vw,48px)">
       <p class="dato" id="fecha-corta">00. 00. 0000</p>
-      <h1 class="nombres-grandes">Pablo &amp; Adri</h1>
+      <h1 class="nombres-grandes">Adriana &amp; Pablo</h1>
       <p class="script">Logroño</p>
     </div>
   </div>
@@ -545,10 +748,14 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   <div class="solape">
     <div class="retrato aparece">
       <div class="pase" id="pase">
-        <img class="diapo activa" src="fotos/pedida.jpg" alt="Pablo y Adri el día de la pedida" style="object-position:center 62%">
-        <img class="diapo" src="fotos/muro.jpg" alt="Pablo y Adri de boda" style="object-position:center 72%">
-        <img class="diapo" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" style="object-position:center 38%">
-        <img class="diapo" src="fotos/noche.jpg" alt="Pablo y Adri una noche de invierno" style="object-position:center 46%">
+        <img class="diapo activa" src="fotos/pedida.jpg" alt="Adriana y Pablo el día de la pedida" style="object-position:center 62%">
+        <img class="diapo" src="fotos/muro.jpg" alt="Adriana y Pablo de boda" style="object-position:center 72%">
+        <img class="diapo" src="fotos/calle.jpg" alt="Adriana y Pablo de paseo" style="object-position:center 82%">
+        <img class="diapo" src="fotos/campo.jpg" alt="Adriana y Pablo en el campo" style="object-position:center 38%">
+        <img class="diapo" src="fotos/sagrada.jpg" alt="Adriana y Pablo frente a la Sagrada Familia" style="object-position:center 72%">
+        <img class="diapo" src="fotos/noche.jpg" alt="Adriana y Pablo una noche de invierno" style="object-position:center 46%">
+        <img class="diapo" src="fotos/rojo.jpg" alt="Adriana y Pablo, un selfi" style="object-position:center 30%">
+        <img class="diapo" src="fotos/jardin.jpg" alt="Adriana y Pablo en un jardín" style="object-position:center 50%">
       </div>
       <div class="puntos" id="puntos" aria-hidden="true"></div>
     </div>
@@ -572,52 +779,247 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   <!-- Invitación -->
   <div class="banda">
     <div class="interior estrecho">
-      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:var(--texto-suave)">Después de mucho camino juntos, y con la ilusión de nuestras familias, queremos celebrar con vosotros el día en que decimos que sí.</p>
+      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:var(--texto-suave)">Hay momentos que merecen compartirse con quienes más queremos.<br>Y este, sin duda, es uno de ellos.</p>
       <div class="filete aparece"></div>
-      <p class="versal aparece">Os invitamos a acompañarnos<br>en un día que no queremos vivir sin vosotros</p>
+      <p class="versal aparece">Nuestra historia continúa, y no imaginamos mejor manera de vivirla que teniéndoos cerca.</p>
     </div>
   </div>
 
   <div class="sangre" data-falta="fotos/muro.jpg">
-    <img class="foto alto" src="fotos/muro.jpg" alt="Pablo y Adri de boda" loading="lazy">
+    <img class="foto alto" src="fotos/muro.jpg" alt="Adriana y Pablo de boda" loading="lazy">
   </div>
 
-  <!-- Dónde -->
-  <div class="banda">
+  <!-- Localizaciones -->
+  <div class="banda" id="localizaciones">
     <div class="interior">
       <div class="sitios aparece">
         <div class="sitio">
           <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6v3.9M10.3 3.3h3.4"/><path d="M7 10.2 12 5.6l5 4.6"/><path d="M7 10.2V21h10V10.2"/><path d="M5.2 21h13.6"/><path d="M10.3 21v-3.4a1.7 1.7 0 0 1 3.4 0V21"/><path d="M12 12.1v2M11 13.1h2"/></svg>
           <span class="titulo">Ceremonia</span>
-          <span class="direccion">Iglesia de San Bartolomé,<br>Logroño.</span>
-          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Iglesia+de+San+Bartolom%C3%A9%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          <span class="direccion">Iglesia Imperial de Santa María de Palacio,<br>Logroño, La Rioja.</span>
+          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Iglesia+Imperial+de+Santa+Mar%C3%ADa+de+Palacio%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
         </div>
         <div class="sitio">
           <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 3.7 9.6 5.2 7.2 12Z"/><path d="M7.2 12 9.4 17.5"/><path d="M7.5 18.4l4.1-1"/><path d="M20.8 3.7 14.4 5.2 16.8 12Z"/><path d="M16.8 12 14.6 17.5"/><path d="M16.5 18.4l-4.1-1"/></svg>
           <span class="titulo">Celebración</span>
-          <span class="direccion">Bodegas Proelio,<br>La Rioja.</span>
-          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Bodegas+Proelio" target="_blank" rel="noopener">Ver mapa</a>
+          <span class="direccion">Bodegas Proelio,<br>Nalda, La Rioja.</span>
+          <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Bodegas+Proelio%2C+Nalda" target="_blank" rel="noopener">Ver mapa</a>
         </div>
       </div>
       <div class="filete aparece"></div>
-      <p class="versal aparece">Los autobuses salen a las 14:30<br>de la rotonda de Marqués de Murrieta</p>
-      <a class="boton-mapa aparece" href="https://www.google.com/maps/search/?api=1&amp;query=42.466167%2C-2.451145" target="_blank" rel="noopener">Ver punto de salida</a>
+      <div class="buses aparece">
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.8" width="14" height="15.4" rx="2.6"/><path d="M5 7h14M5 11.6h14"/><circle cx="8.6" cy="14.6" r=".9"/><circle cx="15.4" cy="14.6" r=".9"/><path d="M7.6 18.2v2.4M16.4 18.2v2.4"/></svg>
+        <span class="titulo">Autobuses</span>
+        <div class="trayectos">
+          <div class="trayecto">
+            <span class="versal">Ida a la ceremonia</span>
+            <span class="hora-bus">11:30</span>
+            <span class="direccion">Salida desde<br>Bodegas Valdelana,<br>Elciego, Álava.</span>
+          </div>
+          <div class="trayecto">
+            <span class="versal">Desde la ceremonia a la celebración</span>
+            <span class="hora-bus">14:00</span>
+            <span class="direccion">Salida desde<br>el Paseo del Espolón,<br>Logroño.</span>
+          </div>
+          <div class="trayecto">
+            <span class="versal">Regreso a Logroño / Elciego</span>
+            <span class="hora-bus">22:00 | 01:00</span>
+            <span class="direccion">Salida desde<br>Bodegas Proelio,<br>Nalda.</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Itinerario -->
-  <div class="banda banda--negro">
+  <div class="banda banda--negro" id="itinerario">
     <div class="interior">
       <p class="rotulo aparece">Itinerario</p>
       <div class="filete aparece"></div>
       <ul class="agenda">
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="14.2" r="5.6"/><circle cx="15.4" cy="11.4" r="4.9"/><path d="m15.4 3.1 1.7 2-1.7 2-1.7-2Z"/></svg><span class="hora">13:00</span><span class="raya"></span><span class="que">Ceremonia</span></li>
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">14:30</span><span class="raya"></span><span class="que">Autobuses</span></li>
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.4h9.6l-.8 5.6a4 4 0 0 1-8 0Z"/><path d="M12 13v6"/><path d="M8.6 19.6h6.8"/></svg><span class="hora">15:00</span><span class="raya"></span><span class="que">Llegada a Bodegas Proelio</span></li>
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 4.6h16.4L12 13.2Z"/><path d="M12 13.2v5.4"/><path d="M8.4 19.2h7.2"/><circle cx="15.6" cy="7.6" r=".9"/></svg><span class="hora">15:00 — 17:00</span><span class="raya"></span><span class="que">Cóctel de bienvenida</span></li>
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.4" r="5.8"/><circle cx="12" cy="12.4" r="2.6"/><path d="M4 3.6v3.8a1.5 1.5 0 0 0 3 0V3.6M5.5 7.4V20"/><path d="M19.4 3.6c1.4 0 2.1 1.9 2.1 3.8s-.7 3-2.1 3Zm0 7.2V20"/></svg><span class="hora">17:00 — 19:00</span><span class="raya"></span><span class="que">Comida</span></li>
-          <li class="aparece"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 7.8 9.4l6.8 6.8Z"/><path d="m8.6 11.4 4 4"/><path d="M14.4 3.4v2.2M19.8 6.2l-1.6 1.5M21 12.2l-2.2.3M17.4 16.6l1.9 1.2"/><circle cx="17.6" cy="11" r=".75"/></svg><span class="hora">19:00 — 00:30</span><span class="raya"></span><span class="que">Fiesta</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">11:30</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.4" cy="14.2" r="5.6"/><circle cx="15.4" cy="11.4" r="4.9"/><path d="m15.4 3.1 1.7 2-1.7 2-1.7-2Z"/></svg><span class="hora">12:30</span></span><span class="raya"></span><span class="que">Ceremonia</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">14:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.2 3.4h9.6l-.8 5.6a4 4 0 0 1-8 0Z"/><path d="M12 13v6"/><path d="M8.6 19.6h6.8"/></svg><span class="hora">14:30</span></span><span class="raya"></span><span class="que">Llegada a Bodegas Proelio</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.8 4.6h16.4L12 13.2Z"/><path d="M12 13.2v5.4"/><path d="M8.4 19.2h7.2"/><circle cx="15.6" cy="7.6" r=".9"/></svg><span class="hora">14:30 – 16:30</span></span><span class="raya"></span><span class="que">Cóctel de bienvenida</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.4" r="5.8"/><circle cx="12" cy="12.4" r="2.6"/><path d="M4 3.6v3.8a1.5 1.5 0 0 0 3 0V3.6M5.5 7.4V20"/><path d="M19.4 3.6c1.4 0 2.1 1.9 2.1 3.8s-.7 3-2.1 3Zm0 7.2V20"/></svg><span class="hora">16:30 – 18:30</span></span><span class="raya"></span><span class="que">Banquete</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 7.8 9.4l6.8 6.8Z"/><path d="m8.6 11.4 4 4"/><path d="M14.4 3.4v2.2M19.8 6.2l-1.6 1.5M21 12.2l-2.2.3M17.4 16.6l1.9 1.2"/><circle cx="17.6" cy="11" r=".75"/></svg><span class="hora">18:30 – 01:00</span></span><span class="raya"></span><span class="que">Fiesta</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">22:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
+          <li class="aparece"><span class="cuando"><svg class="icono icono--agenda" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.9" y="4.6" width="18.2" height="11.7" rx="2.2"/><path d="M2.9 9.7h18.2"/><path d="M7.4 13.2h2M14.6 13.2h2"/><circle cx="7.3" cy="18.7" r="1.7"/><circle cx="16.7" cy="18.7" r="1.7"/><path d="M5.6 16.3v1M18.4 16.3v1"/></svg><span class="hora">01:00</span></span><span class="raya"></span><span class="que">Autobuses</span></li>
       </ul>
+    </div>
+  </div>
+
+  <div class="sangre" data-falta="fotos/logrono.jpg">
+    <img class="foto" src="fotos/logrono.jpg" alt="Adriana y Pablo en fiestas, en Logroño" loading="lazy" style="object-position:center 40%">
+  </div>
+
+  <!-- Alojamiento -->
+  <div class="banda" id="alojamiento">
+    <div class="interior ancho">
+      <div class="filete aparece"></div>
+      <p class="rotulo aparece">Alojamiento</p>
+      <p class="entradilla aparece">Si necesitáis alojamiento para acompañarnos en este día, hemos preparado una selección de hoteles y otras opciones para vuestra estancia.</p>
+      <div class="raya-corta aparece"></div>
+
+      <div class="hoteles">
+        <article class="hotel aparece">
+          <p class="hotel-nombre">Hotel Ciudad de Logroño <span>3*</span></p>
+          <div class="dato-hotel">
+            <span class="etiqueta">Código de descuento</span>
+            <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
+          </div>
+          <div class="botones">
+            <a class="boton-mapa" href="https://www.ciudadlogrono.com/enlaces/boda-adriana-pablo/" target="_blank" rel="noopener">Web</a>
+            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Ciudad+de+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          </div>
+          <div class="detalles">
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4.5h9V21"/><path d="M14 9h5v12"/><path d="M3.5 21h17"/><path d="M7.6 7.6h1.2M10.4 7.6h1.2M7.6 10.8h1.2M10.4 10.8h1.2M7.6 14h1.2M10.4 14h1.2M16 12.4h1M16 15.4h1"/><path d="M8.4 21v-3.2h2.4V21"/></svg>
+              <div>
+                <p class="etiqueta">Condiciones</p>
+                <p>El hotel ha habilitado una página exclusiva para nuestra boda, desde la que podréis realizar vuestra reserva con los descuentos aplicados automáticamente.</p>
+                <p><b>Estancias de 2 noches:</b> 20% DTO. + Late Check Out<br><b>Estancias de 1 noche:</b> 12% DTO. + Late Check Out</p>
+              </div>
+            </div>
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <div>
+                <p class="etiqueta">Parking</p>
+                <p>El hotel dispone de aparcamiento privado.<br>Precio: 13,20 euros / día.<br>Es necesario reservar previamente.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="hotel aparece">
+          <p class="hotel-nombre">Hotel Carlton <span>4*</span></p>
+          <div class="dato-hotel">
+            <span class="etiqueta">Código de descuento</span>
+            <button type="button" class="codigo" data-copiar="AdrianayPablo">AdrianayPablo <small>Copiar</small></button>
+          </div>
+          <div class="botones">
+            <a class="boton-mapa" href="https://www.carltonrioja.com/enlaces/boda-adriana-y-pablo/" target="_blank" rel="noopener">Web</a>
+            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+Carlton+Rioja%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          </div>
+          <div class="detalles">
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4.5h9V21"/><path d="M14 9h5v12"/><path d="M3.5 21h17"/><path d="M7.6 7.6h1.2M10.4 7.6h1.2M7.6 10.8h1.2M10.4 10.8h1.2M7.6 14h1.2M10.4 14h1.2M16 12.4h1M16 15.4h1"/><path d="M8.4 21v-3.2h2.4V21"/></svg>
+              <div>
+                <p class="etiqueta">Condiciones</p>
+                <p>El hotel ha habilitado una página exclusiva para nuestra boda, desde la que podréis realizar vuestra reserva con los descuentos aplicados automáticamente.</p>
+                <p><b>Estancias de 2 noches:</b> 20% DTO. + Late Check Out<br><b>Estancias de 1 noche:</b> 10% DTO. + Late Check Out</p>
+              </div>
+            </div>
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <div>
+                <p class="etiqueta">Parking privado</p>
+                <p>Precio: 20 euros / día.<br>No se realizan reservas previas. Sujeto a disponibilidad.</p>
+              </div>
+            </div>
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <div>
+                <p class="etiqueta">Parking La Paz</p>
+                <p>Acuerdo cerrado con el hotel.<br>Precio: 10 euros / día.</p>
+                <div class="botones">
+                  <a class="boton-mapa" href="https://apk2gestion.com/es/reserva-rotacion/parking/la-paz" target="_blank" rel="noopener">Web</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="hotel aparece">
+          <p class="hotel-nombre">Hotel Eurostars Ruavieja Logroño <span>4*</span></p>
+          <div class="dato-hotel">
+            <span class="etiqueta">Código de descuento</span>
+            <button type="button" class="codigo" data-copiar="BODAAYP">BODAAYP <small>Copiar</small></button>
+          </div>
+          <div class="botones">
+            <a class="boton-mapa" href="https://www.eurostarshotels.com/eurostars-fuerte-ruavieja.html" target="_blank" rel="noopener">Web</a>
+            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Eurostars+Fuerte+Ruavieja%2C+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          </div>
+          <div class="detalles">
+            <div class="detalle">
+              <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5v-3l1.8-4.6a1.6 1.6 0 0 1 1.5-1.1h9.4a1.6 1.6 0 0 1 1.5 1.1L20 12.5v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4.4 12.5h15.2"/><circle cx="7.6" cy="14.4" r=".8"/><circle cx="16.4" cy="14.4" r=".8"/><path d="M6.2 16.5v1.8M17.8 16.5v1.8"/></svg>
+              <div>
+                <p class="etiqueta">Parking privado</p>
+                <p>Precio: 18 euros / día.<br>Es necesario reservar previamente.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="hotel aparece">
+          <p class="hotel-nombre">Hotel FG Logroño <span>3*</span></p>
+          <div class="dato-hotel">
+            <span class="etiqueta">Código de descuento</span>
+            <p>Aunque no contamos con un código de descuento específico para este hotel, os recomendamos consultar su web, donde encontraréis promociones y ofertas habituales.</p>
+          </div>
+          <div class="botones">
+            <a class="boton-mapa" href="https://fg-logrono.bookstaygo.com/es/special-offers-coupons" target="_blank" rel="noopener">Web</a>
+            <a class="boton-mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel+FG+Logro%C3%B1o" target="_blank" rel="noopener">Ver mapa</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="otras aparece">
+        <div class="filete"></div>
+        <p class="rotulo">Otras alternativas</p>
+        <p class="entradilla">También podéis encontrar otras opciones de alojamiento en plataformas como Booking o Airbnb, donde hay una amplia variedad de alternativas para diferentes presupuestos.</p>
+        <div class="raya-corta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información adicional: dress code -->
+  <div class="banda banda--negro" id="informacion">
+    <div class="interior ancho">
+      <p class="rotulo rotulo--espaciado aparece">Dress code</p>
+      <div class="raya-corta aparece"></div>
+      <p class="entradilla aparece">Por encima de cualquier etiqueta, lo que más ilusión nos hace es contar con vosotros.</p>
+      <p class="entradilla aparece">Pensando en cada detalle de nuestro gran día, nos gustaría compartir algunas recomendaciones de vestimenta para disfrutar juntos de una celebración muy especial.</p>
+
+      <div class="vestuario aparece">
+        <div class="atuendo">
+          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3.4 4.6 5.4 4 20.6h16l-.6-15.2-3.6-2"/><path d="M8.2 3.4 9.8 11.6 12 8.2l2.2 3.4 1.6-8.2"/><path d="M9.6 3.4 12 7l2.4-3.6"/><path d="m12 8.2-.8 1.2.8 4.2.8-4.2Z"/><path d="M12 15v5.6"/></svg>
+          <p class="atuendo-titulo">Hombres</p>
+          <p class="prendas">Traje con corbata<br>Zapatos de vestir</p>
+          <div class="raya-corta"></div>
+          <p class="versal">Tonalidades</p>
+          <p class="nota">Una apuesta por los tonos clásicos y atemporales, como el azul marino y el gris.</p>
+        </div>
+        <div class="divisoria"></div>
+        <div class="atuendo">
+          <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.6 2.6v3.6M14.4 2.6v3.6"/><path d="M9.6 6.2c.6 1.1 1.4 1.6 2.4 1.6s1.8-.5 2.4-1.6l.4 4.4H9.2Z"/><path d="M9.2 10.6 5 21h14l-4.2-10.4"/></svg>
+          <p class="atuendo-titulo">Mujeres</p>
+          <p class="prendas">Vestido o conjunto de invitada de día<br>Calzado de vestir</p>
+          <div class="raya-corta"></div>
+          <p class="versal">Paleta de color</p>
+          <p class="nota">Una elección acorde a la ocasión.<br>Libertad de color, excepto el blanco, el marfil o tonos crudos.</p>
+        </div>
+      </div>
+
+      <div class="atuendo atuendo--solo aparece">
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.2 3.4 4.6 5.4 4.2 21h3.4l1.2-7.6 3.2-1.4 3.2 1.4 1.2 7.6h3.4l-.4-15.6-3.6-2"/><path d="M8.2 3.4 9.8 11.6 12 8.2l2.2 3.4 1.6-8.2"/><path d="M9.6 3.4 12 7l2.4-3.6"/><path d="m12 8.2-.8 1.2.8 2.6.8-2.6Z"/></svg>
+        <p class="atuendo-titulo">Testigos masculinos</p>
+        <p class="prendas">Chaqué<br>Zapatos Oxford</p>
+        <div class="raya-corta"></div>
+        <p class="versal">El toque diferencial</p>
+        <p class="nota">El chaleco azul claro queda reservado para el novio.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información adicional: los más pequeños -->
+  <div class="banda">
+    <div class="interior estrecho">
+      <p class="rotulo rotulo--espaciado aparece">Los más pequeños</p>
+      <div class="raya-corta aparece"></div>
+      <p class="entradilla aparece">Nos encantan los niños, pero en esta ocasión hemos optado por una celebración solo para adultos, con el deseo de que todos podáis relajaros y disfrutar al máximo.</p>
+      <p class="entradilla aparece">Aun así, sabemos que cada familia tiene sus circunstancias y entendemos que puede haber ocasiones especiales.</p>
     </div>
   </div>
 
@@ -625,94 +1027,140 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   <div class="banda">
     <div class="collage">
       <div class="texto-collage aparece">
-        <p class="cita">Desde el primer día supimos que esto iba en serio. Ahora sólo falta que estéis vosotros.</p>
-        <p class="script">Tú y yo,<br>para siempre</p>
+        <p class="cita">Elegirnos siempre ha sido lo más fácil.</p>
+        <p class="script">Como nunca,<br>para siempre</p>
       </div>
       <div class="pila aparece">
         <figure class="arco" data-falta="fotos/campo.jpg">
-          <img class="foto" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy" style="object-position:center 30%">
+          <img class="foto" src="fotos/campo.jpg" alt="Adriana y Pablo en el campo" loading="lazy" style="object-position:center 30%">
         </figure>
         <figure class="recuadro" data-falta="fotos/noche.jpg">
-          <img class="foto" src="fotos/noche.jpg" alt="Pablo y Adri una noche de invierno" loading="lazy" style="object-position:center 42%">
+          <img class="foto" src="fotos/noche.jpg" alt="Adriana y Pablo una noche de invierno" loading="lazy" style="object-position:center 42%">
         </figure>
       </div>
     </div>
   </div>
 
   <div class="sangre" data-falta="fotos/campo.jpg">
-    <img class="foto ancho-campo" src="fotos/campo.jpg" alt="Pablo y Adri en el campo" loading="lazy">
+    <img class="foto ancho-campo" src="fotos/campo.jpg" alt="Adriana y Pablo en el campo" loading="lazy">
   </div>
 
   <!-- Confirmar asistencia -->
-  <div class="banda">
-    <div class="interior estrecho" id="confirmar">
+  <div class="banda" id="confirmar">
+    <div class="interior estrecho">
       <p class="rotulo aparece">Confirmar asistencia</p>
-      <p class="versal aparece">Dinos algo antes de que cerremos la lista</p>
+      <p class="versal aparece">El 15 de mayo tiene una pregunta para vosotros.</p>
       <div class="filete aparece"></div>
 
       <form id="rsvp" class="aparece" novalidate>
+        <!-- trampa para robots: una persona nunca lo ve ni lo rellena -->
+        <input type="text" name="_honey" tabindex="-1" autocomplete="off" hidden>
+
         <div class="campo">
           <label for="f-nombre">Nombre y apellidos</label>
-          <input type="text" id="f-nombre" name="nombre" autocomplete="name" placeholder="Cómo te ponemos en la mesa">
+          <input type="text" id="f-nombre" name="nombre" autocomplete="name" placeholder="Empezamos por ti">
         </div>
 
         <div class="campo">
-          <span class="rotulo-campo">¿Vienes?</span>
-          <div class="opciones">
-            <label class="opcion"><input type="radio" id="f-si" name="asistencia" value="Sí, allí estaré" checked><span>Allí estaré</span></label>
-            <label class="opcion"><input type="radio" id="f-no" name="asistencia" value="No podré ir"><span>No podré ir</span></label>
+          <span class="rotulo-campo" id="r-acomp">¿Vienes con acompañante?</span>
+          <div class="opciones" role="radiogroup" aria-labelledby="r-acomp">
+            <label class="opcion"><input type="radio" name="acompanante" value="Sí"><span>Sí</span></label>
+            <label class="opcion"><input type="radio" name="acompanante" value="No"><span>No</span></label>
           </div>
         </div>
 
-        <div class="campo" id="campo-acomp">
-          <label for="f-acompanante">¿Vienes con +1?</label>
-          <select id="f-acompanante" name="acompanante">
-            <option value="Voy solo/a">Voy solo/a</option>
-            <option value="Voy con +1">Voy con +1</option>
-          </select>
+        <div class="campo" id="campo-acomp-nombre" hidden>
+          <label for="f-nombre2">Nombre y apellidos de tu acompañante</label>
+          <input type="text" id="f-nombre2" name="nombre2" placeholder="Dinos cómo se llama tu acompañante">
         </div>
 
-        <div class="campo" id="campo-mas-uno" hidden>
-          <label for="f-nombre2">Nombre de tu +1</label>
-          <input type="text" id="f-nombre2" name="nombre2" placeholder="Para su sitio y su menú">
+        <div class="campo">
+          <span class="rotulo-campo" id="r-dieta">Restricciones alimenticias</span>
+          <details class="desplegable" id="dieta" aria-labelledby="r-dieta"></details>
+          <input type="text" id="dieta-otro" placeholder="Cuéntanos cuál" aria-label="Otra restricción alimenticia" hidden>
         </div>
 
-        <div class="campo" id="campo-alergias">
-          <label for="f-alergias">Alergias o intolerancias</label>
-          <textarea id="f-alergias" name="alergias" placeholder="Las tuyas, las de tu +1, o «ninguna»"></textarea>
+        <div class="campo" id="campo-acomp-dieta" hidden>
+          <span class="rotulo-campo" id="r-dieta2">Restricciones alimenticias de tu acompañante</span>
+          <details class="desplegable" id="dieta2" aria-labelledby="r-dieta2"></details>
+          <input type="text" id="dieta2-otro" placeholder="Cuéntanos cuál" aria-label="Otra restricción alimenticia de tu acompañante" hidden>
         </div>
 
-        <button type="submit" class="boton" id="enviar">Confirmar por WhatsApp</button>
-        <button type="button" class="boton fino" id="copiar-rsvp">Copiar respuesta</button>
-        <p class="aviso" id="aviso-rsvp">Nos llega directo al móvil de Pablo.</p>
+        <div class="campo">
+          <span class="rotulo-campo">Talla de calzado (mujeres)</span>
+          <div class="tallas">
+            <select id="f-talla" aria-label="Tu talla de calzado"><option value="">Selecciona tu talla</option></select>
+            <select id="f-talla2" aria-label="Talla de calzado de tu acompañante" hidden><option value="">Talla de tu acompañante</option></select>
+          </div>
+        </div>
+
+        <div class="form-buses">
+          <p class="titulo-form">Autobuses</p>
+          <div class="raya-corta"></div>
+          <div class="bus-filas">
+            <div class="bus-fila">
+              <div id="b-ida"><span class="bus-titulo">Elciego a la ceremonia</span><span class="bus-detalle">Salida desde Bodegas Valdelana hacia la Iglesia Imperial de Santa María de Palacio.</span></div>
+              <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-ida">
+                <label class="opcion"><input type="radio" name="bus_ida" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_ida" value="No"><span>No</span></label>
+              </div>
+            </div>
+            <div class="bus-fila">
+              <div id="b-celebracion"><span class="bus-titulo">Ceremonia a la celebración</span><span class="bus-detalle">Salida desde el Paseo del Espolón hacia Bodegas Proelio.</span></div>
+              <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-celebracion">
+                <label class="opcion"><input type="radio" name="bus_celebracion" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_celebracion" value="No"><span>No</span></label>
+              </div>
+            </div>
+            <div class="bus-fila">
+              <div id="b-logrono"><span class="bus-titulo">Regreso a Logroño</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia el Paseo del Espolón.</span></div>
+              <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-logrono">
+                <label class="opcion"><input type="radio" name="bus_logrono" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_logrono" value="No"><span>No</span></label>
+              </div>
+            </div>
+            <div class="bus-fila">
+              <div id="b-elciego"><span class="bus-titulo">Regreso a Elciego</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia Bodegas Valdelana.</span></div>
+              <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-elciego">
+                <label class="opcion"><input type="radio" name="bus_elciego" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_elciego" value="No"><span>No</span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="boton" id="enviar">Confirmar asistencia</button>
+        <p class="aviso" id="aviso-rsvp" aria-live="polite"></p>
       </form>
+      <p class="entradilla" id="gracias" hidden></p>
     </div>
   </div>
 
   <!-- Regalo -->
-  <div class="banda banda--negro">
-    <div class="interior estrecho" id="regalo">
+  <div class="banda banda--negro" id="regalo">
+    <div class="interior estrecho">
       <p class="rotulo aparece">Regalo</p>
-      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:rgba(238,238,238,.78)">Vuestra presencia es el mejor regalo. Si además os apetece ayudarnos con el viaje, aquí está la cuenta.</p>
-      <p class="iban aparece" id="iban">ES00 0000 0000 0000 0000 0000</p>
+      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:rgba(238,238,238,.78)">Lo más importante es compartir este día con vosotros.</p>
+      <p class="aparece" style="font-size:clamp(16px,4.2vw,18px);color:rgba(238,238,238,.78)">Si además queréis ayudarnos a dar nuestros primeros pasos en esta nueva etapa, nos hará mucha ilusión que forméis parte de todo lo que está por venir.</p>
+      <p class="iban aparece" id="iban">ES91 1465 0100 9217 6154 0168</p>
       <button type="button" class="boton aparece" id="copiar-iban">Copiar número de cuenta</button>
       <p class="aviso" id="aviso-iban"></p>
     </div>
   </div>
 
   <!-- Contacto -->
-  <div class="banda">
+  <div class="banda" id="contacto">
     <div class="interior estrecho">
       <p class="rotulo aparece">Contacto</p>
-      <p class="versal aparece">Cualquier duda, llámanos</p>
+      <p class="versal aparece">Si necesitáis algo, estamos aquí.</p>
       <div class="contactos aparece">
+        <a class="contacto" href="tel:+34646036697">
+          <span class="quien">Adriana</span>
+          <span class="numero">646 036 697</span>
+        </a>
         <a class="contacto" href="tel:+34689701937">
           <span class="quien">Pablo</span>
           <span class="numero">689 701 937</span>
-        </a>
-        <a class="contacto" href="tel:+34646036697">
-          <span class="quien">Adri</span>
-          <span class="numero">646 036 697</span>
         </a>
       </div>
     </div>
@@ -722,7 +1170,7 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
   <div class="banda banda--negro">
     <div class="interior">
       <p class="script aparece">¡Os esperamos!</p>
-      <p class="monograma aparece">P &amp; A</p>
+      <p class="monograma aparece">A &amp; P</p>
       <p class="cierre-fecha aparece" id="cierre-fecha"></p>
     </div>
   </div>
@@ -730,10 +1178,13 @@ input:focus,textarea:focus,select:focus{outline:0;border-bottom-color:var(--text
 
 <script>
 /* ═══ CONFIGURACIÓN ═══════════════════════════════════════════════ */
-const FECHA_BODA = new Date('2027-05-15T13:00:00');   // sabado 15 de mayo de 2027, ceremonia a las 13:00
-const TEL_PABLO  = '34689701937';                      // WhatsApp que recibe las confirmaciones
-const IBAN       = 'ES00 0000 0000 0000 0000 0000';    // ⚠ CAMBIA ESTO por la cuenta real
-const CANCION    = 'musica/cancion.mp3';               // opcional
+const FECHA_BODA  = new Date('2027-05-15T12:30:00');   // sabado 15 de mayo de 2027, ceremonia a las 12:30
+const CORREO_RSVP = 'taboada.pab@gmail.com';            // recibe las confirmaciones (FormSubmit)
+const IBAN        = 'ES91 1465 0100 9217 6154 0168';    // cuenta para el regalo
+const CANCION     = 'musica/cancion.mp3';               // opcional
+const RESTRICCIONES = ['Celiaquía / Gluten', 'Lactosa', 'Diabetes', 'Marisco', 'Pescado',
+                       'Frutos Secos', 'Embarazo', 'Vegetariano / Vegano', 'Otro'];
+const TALLAS = ['36', '37', '38', '39', '40'];
 /* ════════════════════════════════════════════════════════════════ */
 
 document.documentElement.lang = 'es';
@@ -743,7 +1194,7 @@ const $ = (s) => document.querySelector(s);
 /* ── Nombre del invitado: ?n=Ana%20María%20López ───────────────── */
 const invitado = new URLSearchParams(location.search).get('n');
 if (invitado) {
-  $('#intro').textContent = `${invitado}, el día más importante de nuestras vidas ha llegado`;
+  $('#intro').textContent = `${invitado}, el día más importante de nuestras vidas ha llegado.`;
   $('#f-nombre').value = invitado;
 }
 
@@ -828,7 +1279,24 @@ sobre.addEventListener('click', () => {
   setTimeout(() => {
     capa.classList.add('fuera');
     document.body.classList.remove('bloqueado');
+    menuBoton.hidden = false;
   }, espera);
+});
+
+/* ── Menú de navegación ────────────────────────────────────────── */
+const menuBoton = $('#menu-boton');
+function menu(abrir) {
+  document.body.classList.toggle('menu-abierto', abrir);
+  menuBoton.setAttribute('aria-expanded', String(abrir));
+  $('#menu-texto').textContent = abrir ? 'Cerrar' : 'Menú';
+}
+menuBoton.addEventListener('click', () => menu(!document.body.classList.contains('menu-abierto')));
+document.querySelectorAll('#menu a').forEach((a) => a.addEventListener('click', () => menu(false)));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.body.classList.contains('menu-abierto')) {
+    menu(false);
+    menuBoton.focus();
+  }
 });
 
 /* ── Pase de fotos de la portada ───────────────────────────────── */
@@ -879,46 +1347,124 @@ document.querySelectorAll('img.foto').forEach((img) => {
 });
 
 /* ── Formulario ────────────────────────────────────────────────── */
-const selAcomp  = $('#f-acompanante');
-const campoMas  = $('#campo-mas-uno');
-const campoAcmp = $('#campo-acomp');
-const campoAler = $('#campo-alergias');
+const valorRadio = (nombre) => document.querySelector(`input[name=${nombre}]:checked`)?.value || '';
 
-function refrescarForm() {
-  const viene = document.querySelector('input[name=asistencia]:checked').value.startsWith('Sí');
-  campoAcmp.hidden = !viene;
-  campoAler.hidden = !viene;
-  campoMas.hidden  = !viene || selAcomp.value !== 'Voy con +1';
+// desplegables de restricciones: varias casillas, y «Otro» abre un campo de texto
+const FLECHA = '<svg class="flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+const VACIO  = 'Selecciona las que correspondan';
+function montarDesplegable(id) {
+  const caja = $('#' + id);
+  const otro = $('#' + id + '-otro');
+  caja.innerHTML = `<summary><span class="resumen">${VACIO}</span>${FLECHA}</summary><div class="lista"></div>`;
+  const lista = caja.querySelector('.lista');
+  RESTRICCIONES.forEach((r) => {
+    const fila = document.createElement('label');
+    fila.className = 'marca';
+    fila.innerHTML = '<input type="checkbox"><span></span>';
+    fila.querySelector('input').value = r;
+    fila.querySelector('span').textContent = r;
+    lista.appendChild(fila);
+  });
+  caja.addEventListener('change', (e) => {
+    const elegidas = elegidasEn(caja);
+    caja.querySelector('.resumen').textContent = elegidas.length ? elegidas.join(', ') : VACIO;
+    otro.hidden = !elegidas.includes('Otro');
+    if (e.target.value === 'Otro' && e.target.checked) otro.focus();
+  });
 }
-selAcomp.addEventListener('change', refrescarForm);
-document.querySelectorAll('input[name=asistencia]').forEach((r) => r.addEventListener('change', refrescarForm));
+const elegidasEn = (caja) => [...caja.querySelectorAll('input:checked')].map((c) => c.value);
+montarDesplegable('dieta');
+montarDesplegable('dieta2');
+
+// se cierran al pulsar fuera o con Escape
+document.addEventListener('click', (e) => {
+  document.querySelectorAll('.desplegable[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.desplegable[open]').forEach((d) => { d.open = false; d.querySelector('summary').focus(); });
+});
+
+TALLAS.forEach((t) => {
+  ['#f-talla', '#f-talla2'].forEach((s) => $(s).add(new Option(t, t)));
+});
+
+// lo del acompañante sólo aparece si viene con alguien
+function refrescarForm() {
+  const conAcomp = valorRadio('acompanante') === 'Sí';
+  $('#campo-acomp-nombre').hidden = !conAcomp;
+  $('#campo-acomp-dieta').hidden  = !conAcomp;
+  $('#f-talla2').hidden           = !conAcomp;
+}
+document.querySelectorAll('input[name=acompanante]').forEach((r) => r.addEventListener('change', refrescarForm));
 refrescarForm();
 
-function redactar() {
-  const nombre   = $('#f-nombre').value.trim() || '(sin nombre)';
-  const viene    = document.querySelector('input[name=asistencia]:checked').value;
-  const acomp    = selAcomp.value;
-  const nombre2  = $('#f-nombre2').value.trim();
-  const alergias = $('#f-alergias').value.trim() || 'Ninguna';
-
-  let texto = `Confirmación boda Pablo & Adri\n\nNombre: ${nombre}\nAsistencia: ${viene}`;
-  if (viene.startsWith('Sí')) {
-    texto += `\nAcompañante: ${acomp}`;
-    if (acomp === 'Voy con +1' && nombre2) texto += ` (${nombre2})`;
-    texto += `\nAlergias: ${alergias}`;
-  }
-  return texto;
+// devuelve el texto de las restricciones, o null si marcó «Otro» sin decir cuál
+function restricciones(id) {
+  const elegidas = elegidasEn($('#' + id));
+  if (!elegidas.length) return 'Ninguna';
+  const otro = $('#' + id + '-otro').value.trim();
+  if (elegidas.includes('Otro') && !otro) return null;
+  return elegidas.map((r) => (r === 'Otro' ? `Otro: ${otro}` : r)).join(', ');
 }
 
-$('#rsvp').addEventListener('submit', (e) => {
+function avisar(texto, foco) {
+  $('#aviso-rsvp').textContent = texto;
+  if (foco) foco.focus();
+}
+
+const enviar = $('#enviar');
+$('#rsvp').addEventListener('submit', async (e) => {
   e.preventDefault();
-  if (!$('#f-nombre').value.trim()) {
-    $('#aviso-rsvp').textContent = 'Escribe tu nombre para que sepamos quién eres.';
-    $('#f-nombre').focus();
-    return;
+  const nombre  = $('#f-nombre').value.trim();
+  const acomp   = valorRadio('acompanante');
+  const nombre2 = $('#f-nombre2').value.trim();
+  const dieta   = restricciones('dieta');
+  const dieta2  = acomp === 'Sí' ? restricciones('dieta2') : '';
+
+  if (!nombre) return avisar('Escribe tu nombre para que sepamos quién eres.', $('#f-nombre'));
+  if (!acomp)  return avisar('Dinos si vienes con acompañante.', document.querySelector('input[name=acompanante]'));
+  if (acomp === 'Sí' && !nombre2) return avisar('Dinos cómo se llama tu acompañante.', $('#f-nombre2'));
+  if (dieta === null)  return avisar('Cuéntanos qué otra restricción tienes.', $('#dieta-otro'));
+  if (dieta2 === null) return avisar('Cuéntanos qué otra restricción tiene tu acompañante.', $('#dieta2-otro'));
+
+  const sinResponder = (v) => v || 'Sin responder';
+  const datos = {
+    'Nombre': nombre,
+    'Viene con acompañante': acomp,
+    'Acompañante': acomp === 'Sí' ? nombre2 : '—',
+    'Restricciones alimenticias': dieta,
+    'Restricciones del acompañante': acomp === 'Sí' ? dieta2 : '—',
+    'Talla de calzado': $('#f-talla').value || '—',
+    'Talla de calzado del acompañante': acomp === 'Sí' ? ($('#f-talla2').value || '—') : '—',
+    'Bus Elciego a la ceremonia': sinResponder(valorRadio('bus_ida')),
+    'Bus ceremonia a la celebración': sinResponder(valorRadio('bus_celebracion')),
+    'Bus regreso a Logroño': sinResponder(valorRadio('bus_logrono')),
+    'Bus regreso a Elciego': sinResponder(valorRadio('bus_elciego')),
+    _subject: `Confirmación boda Adriana & Pablo: ${nombre}${acomp === 'Sí' ? ' + ' + nombre2 : ''}`,
+    _template: 'table',
+    _honey: $('#rsvp [name=_honey]').value,
+  };
+
+  enviar.disabled = true;
+  enviar.textContent = 'Enviando…';
+  avisar('');
+  try {
+    const r = await fetch(`https://formsubmit.co/ajax/${CORREO_RSVP}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(datos),
+    });
+    const respuesta = await r.json();
+    if (!r.ok || String(respuesta.success) !== 'true') throw new Error(respuesta.message);
+    $('#rsvp').hidden = true;
+    $('#gracias').textContent = `¡Gracias, ${nombre.split(' ')[0]}! Hemos recibido tu confirmación.`;
+    $('#gracias').hidden = false;
+  } catch {
+    avisar('No se ha podido enviar. Vuelve a intentarlo en un momento o llámanos.');
+    enviar.disabled = false;
+    enviar.textContent = 'Confirmar asistencia';
   }
-  window.open(`https://wa.me/${TEL_PABLO}?text=${encodeURIComponent(redactar())}`, '_blank', 'noopener');
-  $('#aviso-rsvp').textContent = 'Se abre WhatsApp con tu respuesta lista. Sólo tienes que darle a enviar.';
 });
 
 async function alPortapapeles(texto, aviso, hecho) {
@@ -929,10 +1475,21 @@ async function alPortapapeles(texto, aviso, hecho) {
     aviso.textContent = 'Tu navegador no deja copiar. Selecciónalo a mano.';
   }
 }
-$('#copiar-rsvp').addEventListener('click', () => {
-  alPortapapeles(redactar(), $('#aviso-rsvp'), 'Respuesta copiada. Mándanosla por donde prefieras.');
-});
 $('#copiar-iban').addEventListener('click', () => {
   alPortapapeles(IBAN.replace(/\s/g, ''), $('#aviso-iban'), 'Número de cuenta copiado. Gracias de verdad.');
+});
+
+// códigos de descuento de los hoteles: el propio botón dice «Copiado»
+document.querySelectorAll('.codigo').forEach((b) => {
+  const pista = b.querySelector('small');
+  b.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(b.dataset.copiar);
+      pista.textContent = 'Copiado';
+    } catch {
+      pista.textContent = 'Cópialo a mano';
+    }
+    setTimeout(() => { pista.textContent = 'Copiar'; }, 2200);
+  });
 });
 </script>

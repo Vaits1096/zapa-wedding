@@ -1,4 +1,4 @@
-# Pablo & Adri — 15 de mayo de 2027
+# Adriana & Pablo — 15 de mayo de 2027
 
 Invitación de boda. Una sola página, sin dependencias ni build: se abre
 `index.html` en cualquier navegador y funciona.
@@ -25,15 +25,27 @@ Todo lo configurable está junto, al principio del `<script>` del final de
 | constante    | qué es                                                   |
 |--------------|----------------------------------------------------------|
 | `FECHA_BODA` | fecha y hora de la boda. De aquí salen la cuenta atrás, la portada y el cierre |
-| `TEL_PABLO`  | móvil que recibe las confirmaciones por WhatsApp          |
+| `CORREO_RSVP` | correo que recibe las confirmaciones (vía FormSubmit)   |
 | `IBAN`       | cuenta para el regalo                                     |
 | `CANCION`    | ruta del mp3 de fondo (opcional)                          |
+| `RESTRICCIONES`, `TALLAS` | opciones de los desplegables del formulario  |
+
+## Confirmaciones por correo
+
+El formulario manda cada respuesta a `CORREO_RSVP` a través de
+[FormSubmit](https://formsubmit.co), sin servidor propio. La primera vez que
+alguien envía el formulario desde la web publicada, FormSubmit manda un
+correo de activación a esa dirección: hay que abrirlo y confirmar. Hasta
+entonces las respuestas no llegan, así que conviene hacer una prueba antes
+de mandar la invitación. Desde `file://` no funciona; hay que probarlo en
+la web publicada.
 
 ## Estructura
 
 ```
 index.html     la página entera: estructura, estilos y lógica
-fotos/              pedida.jpg  campo.jpg  muro.jpg  noche.jpg
+fotos/              pedida.jpg  muro.jpg  calle.jpg  campo.jpg  sagrada.jpg
+                    noche.jpg  rojo.jpg  jardin.jpg  logrono.jpg
 assets/             piezas del sobre: lacre, texturas de papel y sombras
 musica/             cancion.mp3 (opcional, no versionado)
 ```
