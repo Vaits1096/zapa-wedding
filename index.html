@@ -398,6 +398,10 @@ label.marca{
 .opciones--mini{flex-wrap:nowrap}
 .opciones--mini .opcion{flex:0 0 78px}
 .opciones--mini .opcion span{padding:11px 6px}
+@media (max-width:560px){
+  .bus-fila--horas{grid-template-columns:1fr}
+  .bus-fila--horas .opciones--mini .opcion{flex:1 1 0}
+}
 
 .opciones{display:flex;gap:6px;flex-wrap:wrap}
 .opcion{flex:1 1 140px;position:relative}
@@ -1185,17 +1189,19 @@ label.marca{
                 <label class="opcion"><input type="radio" name="bus_celebracion" value="No"><span>No</span></label>
               </div>
             </div>
-            <div class="bus-fila">
-              <div id="b-logrono"><span class="bus-titulo">Regreso a Logroño</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia el Paseo del Espolón.</span></div>
+            <div class="bus-fila bus-fila--horas">
+              <div id="b-logrono"><span class="bus-titulo">Regreso a Logroño</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia el Paseo del Espolón. ¿En el de las 22:00 o en el de la 01:00?</span></div>
               <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-logrono">
-                <label class="opcion"><input type="radio" name="bus_logrono" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_logrono" value="22:00"><span>22:00</span></label>
+                <label class="opcion"><input type="radio" name="bus_logrono" value="01:00"><span>01:00</span></label>
                 <label class="opcion"><input type="radio" name="bus_logrono" value="No"><span>No</span></label>
               </div>
             </div>
-            <div class="bus-fila">
-              <div id="b-elciego"><span class="bus-titulo">Regreso a Elciego</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia Bodegas Valdelana.</span></div>
+            <div class="bus-fila bus-fila--horas">
+              <div id="b-elciego"><span class="bus-titulo">Regreso a Elciego</span><span class="bus-detalle">Salida desde Bodegas Proelio hacia Bodegas Valdelana. ¿En el de las 22:00 o en el de la 01:00?</span></div>
               <div class="opciones opciones--mini" role="radiogroup" aria-labelledby="b-elciego">
-                <label class="opcion"><input type="radio" name="bus_elciego" value="Sí"><span>Sí</span></label>
+                <label class="opcion"><input type="radio" name="bus_elciego" value="22:00"><span>22:00</span></label>
+                <label class="opcion"><input type="radio" name="bus_elciego" value="01:00"><span>01:00</span></label>
                 <label class="opcion"><input type="radio" name="bus_elciego" value="No"><span>No</span></label>
               </div>
             </div>
