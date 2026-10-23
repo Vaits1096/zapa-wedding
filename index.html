@@ -1211,7 +1211,7 @@ label.marca{
         <button type="submit" class="boton" id="enviar">Confirmar asistencia</button>
         <p class="aviso" id="aviso-rsvp" aria-live="polite"></p>
       </form>
-      <p class="entradilla" id="gracias" hidden></p>
+      <p class="entradilla" id="gracias" role="status" tabindex="-1" hidden></p>
     </div>
   </div>
 
@@ -1495,6 +1495,8 @@ function avisar(texto, foco) {
 const enviar = $('#enviar');
 $('#rsvp').addEventListener('submit', async (e) => {
   e.preventDefault();
+  // También bloquea Enter y los eventos submit repetidos mientras esperamos.
+  if (enviar.disabled || $('#rsvp').hidden) return;
   const nombre  = $('#f-nombre').value.trim();
   const acomp   = valorRadio('acompanante');
   const nombre2 = $('#f-nombre2').value.trim();
@@ -1506,6 +1508,8 @@ $('#rsvp').addEventListener('submit', async (e) => {
   if (acomp === 'Sí' && !nombre2) return avisar('Dinos cómo se llama tu acompañante.', $('#f-nombre2'));
   if (dieta === null)  return avisar('Cuéntanos qué otra restricción tienes.', $('#dieta-otro'));
   if (dieta2 === null) return avisar('Cuéntanos qué otra restricción tiene tu acompañante.', $('#dieta2-otro'));
+
+  if (navigator.onLine === false) return avisar('Parece que no tienes conexión. Conéctate a internet y vuelve a enviarlo.');
 
   const sinResponder = (v) => v || 'Sin responder';
   const datos = {
@@ -1527,32 +1531,39 @@ $('#rsvp').addEventListener('submit', async (e) => {
 
   enviar.disabled = true;
   enviar.textContent = 'Enviando…';
+  enviar.setAttribute('aria-busy', 'true');
   avisar('');
-  // sin límite, una conexión que se cuelga dejaba el botón en «Enviando…» para siempre
+  // FormSubmit puede haber enviado el correo antes de devolver la respuesta.
+  // Damos margen al servicio y nunca repetimos el POST automáticamente.
   const corte = new AbortController();
-  const lento = setTimeout(() => avisar('Está tardando un poco más de lo normal…'), 6000);
-  const limite = setTimeout(() => corte.abort(), 20000);
+  const lento = setTimeout(() => avisar('Estamos enviando tu confirmación. Espera un momento, por favor…'), 10000);
+  const demora = setTimeout(() => avisar('El servicio está tardando más de lo habitual. Seguimos esperando la confirmación; no hace falta volver a enviarla.'), 30000);
+  const limite = setTimeout(() => corte.abort(), 120000);
   try {
     const r = await fetch(`https://formsubmit.co/ajax/${CORREO_RSVP}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(datos),
+      // El formato de un formulario normal evita una petición CORS previa.
+      headers: { Accept: 'application/json' },
+      body: new URLSearchParams(datos),
       signal: corte.signal,
     });
     const respuesta = await r.json();
-    if (!r.ok || String(respuesta.success) !== 'true') throw new Error(respuesta.message);
+    if (!r.ok || String(respuesta?.success) !== 'true') throw new Error('Sin confirmación del servicio');
     $('#rsvp').hidden = true;
     $('#gracias').textContent = `¡Gracias, ${nombre.split(' ')[0]}! Hemos recibido tu confirmación.`;
     $('#gracias').hidden = false;
+    $('#gracias').focus();
   } catch (err) {
     avisar(err.name === 'AbortError'
-      ? 'No hemos recibido respuesta. Puede que tu confirmación sí haya llegado; si la envías otra vez no pasa nada.'
-      : 'No se ha podido enviar. Vuelve a intentarlo en un momento o llámanos.');
+      ? 'El servicio está tardando demasiado en confirmar el envío. Antes de reenviarlo, contacta con Adriana o Pablo para comprobar si ha llegado.'
+      : 'No hemos podido comprobar la confirmación. Conservamos tus datos en el formulario. Contacta con Adriana o Pablo antes de reenviarlo para evitar duplicados.');
     enviar.disabled = false;
-    enviar.textContent = 'Confirmar asistencia';
+    enviar.textContent = 'Volver a enviar';
   } finally {
     clearTimeout(lento);
+    clearTimeout(demora);
     clearTimeout(limite);
+    enviar.removeAttribute('aria-busy');
   }
 });
 

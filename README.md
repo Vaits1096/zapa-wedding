@@ -40,6 +40,19 @@ entonces las respuestas no llegan, así que conviene hacer una prueba antes
 de mandar la invitación. Desde `file://` no funciona; hay que probarlo en
 la web publicada.
 
+El envío espera hasta dos minutos la respuesta de FormSubmit: el correo puede
+llegar antes de que el servicio devuelva la confirmación. Durante la espera se
+bloquean los envíos repetidos. Solo se muestra «Hemos recibido tu confirmación»
+si el servicio responde correctamente con `success: true`. Si se pierde la
+respuesta, se conservan los campos y se pide comprobar la recepción con los
+novios antes de reenviar; no hay reintentos automáticos.
+
+Para comprobar las regresiones del envío sin mandar correos reales:
+
+```sh
+node --test tests/rsvp.test.cjs
+```
+
 ## Estructura
 
 ```
