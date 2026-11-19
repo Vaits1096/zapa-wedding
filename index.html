@@ -432,6 +432,7 @@ label.marca{
 
 .aviso{font-size:15px;font-style:italic;color:var(--texto-tenue);text-align:center}
 .banda--negro .aviso{color:rgba(238,238,238,.6)}
+.rsvp-alternativa:not([hidden]){display:grid;gap:12px;text-align:center}
 
 /* regalo */
 .iban{
@@ -1210,6 +1211,13 @@ label.marca{
 
         <button type="submit" class="boton" id="enviar">Confirmar asistencia</button>
         <p class="aviso" id="aviso-rsvp" aria-live="polite"></p>
+        <div class="rsvp-alternativa" id="rsvp-alternativa" hidden>
+          <button type="button" class="boton fino" id="rsvp-abrir-correo">Abrir borrador de correo</button>
+          <p class="aviso">Si prefieres usar tu correo web, copia las respuestas y envíalas a <span id="rsvp-direccion"></span>.</p>
+          <button type="button" class="boton fino" id="rsvp-copiar">Copiar respuestas</button>
+          <textarea id="rsvp-texto" aria-label="Respuestas para copiar" rows="6" readonly hidden></textarea>
+          <p class="aviso" id="aviso-rsvp-copia" aria-live="polite"></p>
+        </div>
       </form>
       <p class="entradilla" id="gracias" role="status" tabindex="-1" hidden></p>
     </div>
@@ -1493,10 +1501,10 @@ function avisar(texto, foco) {
 }
 
 const enviar = $('#enviar');
-$('#rsvp').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  // También bloquea Enter y los eventos submit repetidos mientras esperamos.
-  if (enviar.disabled || $('#rsvp').hidden) return;
+const alternativaRsvp = $('#rsvp-alternativa');
+$('#rsvp-direccion').textContent = CORREO_RSVP;
+
+function leerConfirmacion() {
   const nombre  = $('#f-nombre').value.trim();
   const acomp   = valorRadio('acompanante');
   const nombre2 = $('#f-nombre2').value.trim();
@@ -1509,10 +1517,8 @@ $('#rsvp').addEventListener('submit', async (e) => {
   if (dieta === null)  return avisar('Cuéntanos qué otra restricción tienes.', $('#dieta-otro'));
   if (dieta2 === null) return avisar('Cuéntanos qué otra restricción tiene tu acompañante.', $('#dieta2-otro'));
 
-  if (navigator.onLine === false) return avisar('Parece que no tienes conexión. Conéctate a internet y vuelve a enviarlo.');
-
   const sinResponder = (v) => v || 'Sin responder';
-  const datos = {
+  return {
     'Nombre': nombre,
     'Viene con acompañante': acomp,
     'Acompañante': acomp === 'Sí' ? nombre2 : '—',
@@ -1524,44 +1530,88 @@ $('#rsvp').addEventListener('submit', async (e) => {
     'Bus ceremonia a la celebración': sinResponder(valorRadio('bus_celebracion')),
     'Bus regreso a Logroño': sinResponder(valorRadio('bus_logrono')),
     'Bus regreso a Elciego': sinResponder(valorRadio('bus_elciego')),
-    _subject: `Confirmación boda Adriana & Pablo: ${nombre}${acomp === 'Sí' ? ' + ' + nombre2 : ''}`,
-    _template: 'table',
-    _honey: $('#rsvp [name=_honey]').value,
   };
+}
+
+function asuntoConfirmacion(datos) {
+  const nombres = datos['Viene con acompañante'] === 'Sí' ? `${datos.Nombre} + ${datos.Acompañante}` : datos.Nombre;
+  return `Confirmación boda Adriana & Pablo: ${nombres}`;
+}
+
+function textoConfirmacion(datos) {
+  return Object.entries(datos).map(([campo, valor]) => `${campo}: ${valor}`).join('\r\n');
+}
+
+$('#rsvp-abrir-correo').addEventListener('click', () => {
+  const datos = leerConfirmacion();
+  if (!datos) return;
+  const asunto = encodeURIComponent(asuntoConfirmacion(datos));
+  const cuerpo = encodeURIComponent(textoConfirmacion(datos));
+  location.href = `mailto:${CORREO_RSVP}?subject=${asunto}&body=${cuerpo}`;
+  avisar('Pulsa Enviar en tu aplicación de correo para confirmar la asistencia.');
+});
+
+$('#rsvp-copiar').addEventListener('click', async () => {
+  const datos = leerConfirmacion();
+  if (!datos) return;
+  const texto = textoConfirmacion(datos);
+  const campo = $('#rsvp-texto');
+  const copiado = await alPortapapeles(texto, $('#aviso-rsvp-copia'), 'Respuestas copiadas. Pégalas en un correo y envíalo.');
+  campo.hidden = copiado;
+  campo.value = copiado ? '' : texto;
+  if (!copiado) {
+    campo.focus();
+    campo.select();
+  }
+});
+
+$('#rsvp').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (enviar.disabled || $('#rsvp').hidden) return;
+  const datos = leerConfirmacion();
+  if (!datos) return;
+
+  if (navigator.onLine === false) {
+    alternativaRsvp.hidden = false;
+    return avisar('Parece que no tienes conexión. Puedes preparar un correo y enviarlo cuando recuperes la conexión.');
+  }
 
   enviar.disabled = true;
   enviar.textContent = 'Enviando…';
   enviar.setAttribute('aria-busy', 'true');
+  alternativaRsvp.hidden = true;
+  $('#rsvp-texto').hidden = true;
+  $('#rsvp-texto').value = '';
+  $('#aviso-rsvp-copia').textContent = '';
   avisar('');
-  // FormSubmit puede haber enviado el correo antes de devolver la respuesta.
-  // Damos margen al servicio y nunca repetimos el POST automáticamente.
   const corte = new AbortController();
-  const lento = setTimeout(() => avisar('Estamos enviando tu confirmación. Espera un momento, por favor…'), 10000);
-  const demora = setTimeout(() => avisar('El servicio está tardando más de lo habitual. Seguimos esperando la confirmación; no hace falta volver a enviarla.'), 30000);
-  const limite = setTimeout(() => corte.abort(), 120000);
+  const limite = setTimeout(() => corte.abort(), 12000);
   try {
     const r = await fetch(`https://formsubmit.co/ajax/${CORREO_RSVP}`, {
       method: 'POST',
       // El formato de un formulario normal evita una petición CORS previa.
       headers: { Accept: 'application/json' },
-      body: new URLSearchParams(datos),
+      body: new URLSearchParams({
+        ...datos,
+        _subject: asuntoConfirmacion(datos),
+        _template: 'table',
+        _honey: $('#rsvp [name=_honey]').value,
+      }),
       signal: corte.signal,
     });
+    if (!r.ok) throw new Error('Error de FormSubmit');
     const respuesta = await r.json();
-    if (!r.ok || String(respuesta?.success) !== 'true') throw new Error('Sin confirmación del servicio');
+    if (respuesta?.success !== true && respuesta?.success !== 'true') throw new Error('Sin confirmación del servicio');
     $('#rsvp').hidden = true;
-    $('#gracias').textContent = `¡Gracias, ${nombre.split(' ')[0]}! Hemos recibido tu confirmación.`;
+    $('#gracias').textContent = `¡Gracias, ${datos.Nombre.split(/\s+/)[0]}! Hemos recibido tu confirmación.`;
     $('#gracias').hidden = false;
     $('#gracias').focus();
-  } catch (err) {
-    avisar(err.name === 'AbortError'
-      ? 'El servicio está tardando demasiado en confirmar el envío. Antes de reenviarlo, contacta con Adriana o Pablo para comprobar si ha llegado.'
-      : 'No hemos podido comprobar la confirmación. Conservamos tus datos en el formulario. Contacta con Adriana o Pablo antes de reenviarlo para evitar duplicados.');
+  } catch {
+    avisar('El formulario no ha podido confirmar el envío. Puedes enviar tus respuestas por correo a Adriana y Pablo.');
+    alternativaRsvp.hidden = false;
     enviar.disabled = false;
-    enviar.textContent = 'Volver a enviar';
+    enviar.textContent = 'Volver a intentar';
   } finally {
-    clearTimeout(lento);
-    clearTimeout(demora);
     clearTimeout(limite);
     enviar.removeAttribute('aria-busy');
   }
@@ -1571,8 +1621,10 @@ async function alPortapapeles(texto, aviso, hecho) {
   try {
     await navigator.clipboard.writeText(texto);
     aviso.textContent = hecho;
+    return true;
   } catch {
     aviso.textContent = 'Tu navegador no deja copiar. Selecciónalo a mano.';
+    return false;
   }
 }
 $('#copiar-iban').addEventListener('click', () => {
