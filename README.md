@@ -25,23 +25,21 @@ Todo lo configurable está junto, al principio del `<script>` del final de
 | constante    | qué es                                                   |
 |--------------|----------------------------------------------------------|
 | `FECHA_BODA` | fecha y hora de la boda. De aquí salen la cuenta atrás, la portada y el cierre |
-| `CORREO_RSVP` | correo que recibe las confirmaciones (vía FormSubmit)   |
+| `CORREO_RSVP` | correo que recibe las confirmaciones (vía FormSend)     |
 | `IBAN`       | cuenta para el regalo                                     |
 | `CANCION`    | ruta del mp3 de fondo (opcional)                          |
 | `RESTRICCIONES`, `TALLAS` | opciones de los desplegables del formulario  |
 
 ## Confirmaciones por correo
 
-El formulario manda cada respuesta a `CORREO_RSVP` a través de
-[FormSubmit](https://formsubmit.co), sin servidor propio. La primera vez que
-alguien envía el formulario desde la web publicada, FormSubmit manda un
-correo de activación a esa dirección: hay que abrirlo y confirmar. Hasta
-entonces las respuestas no llegan, así que conviene hacer una prueba antes
-de mandar la invitación. Desde `file://` no funciona; hay que probarlo en
-la web publicada.
+El formulario manda cada respuesta a `CORREO_RSVP` mediante el modo anónimo
+de [FormSend](https://formsend.co/docs). Este modo admite envíos desde el
+primero sin crear una cuenta ni activar el buzón. El plan gratuito incluye
+250 envíos al mes. FormSend guarda las respuestas y pone los correos en cola,
+así que la notificación puede llegar unos minutos después de confirmar en la web.
 
-El formulario espera hasta 12 segundos la respuesta de FormSubmit y solo muestra
-«Hemos recibido tu confirmación» cuando el servicio confirma el envío. Si falla
+El formulario espera hasta 5 segundos y solo muestra «Hemos recibido tu
+confirmación» cuando FormSend acepta la respuesta y pone el correo en cola. Si falla
 o se agota la espera, conserva las respuestas y ofrece abrir un borrador
 dirigido a `CORREO_RSVP` o copiar los datos para enviarlos desde el correo web.
 El invitado pulsa Enviar en su propio correo. El formulario no reintenta el

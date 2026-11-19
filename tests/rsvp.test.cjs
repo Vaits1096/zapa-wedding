@@ -7,9 +7,10 @@ const { join } = require('node:path');
 const html = readFileSync(join(__dirname, '..', 'index.html'), 'utf8');
 const source = html.slice(html.indexOf('function avisar('), html.indexOf("$('#copiar-iban').addEventListener"));
 const flush = () => new Promise(setImmediate);
+const queued = { success: true, is_spam: false, email: { queued: 1 } };
 
 // Run the real submit handler with a controlled network and clock: no emails.
-function formulario({ delay = 0, bodyDelay = 0, status = 200, response = { success: true }, failure, online = true, clipboard = true } = {}) {
+function formulario({ delay = 0, bodyDelay = 0, status = 200, response = queued, failure, online = true, clipboard = true } = {}) {
   let now = 0;
   let nextTimer = 0;
   let submit;
@@ -22,7 +23,7 @@ function formulario({ delay = 0, bodyDelay = 0, status = 200, response = { succe
   const fields = new Map();
   for (const [selector, value] of Object.entries({
     '#f-nombre': '  María Muñoz  ', '#f-nombre2': 'José García',
-    '#f-talla': '38', '#f-talla2': '40', '#rsvp [name=_honey]': '',
+    '#f-talla': '38', '#f-talla2': '40', '#rsvp [name=_honeypot]': '',
     '#dieta-otro': '', '#dieta2-otro': '',
   })) fields.set(selector, { value });
   for (const selector of ['#rsvp', '#enviar', '#aviso-rsvp', '#gracias', '#rsvp-alternativa',
@@ -106,14 +107,14 @@ function formulario({ delay = 0, bodyDelay = 0, status = 200, response = { succe
 }
 
 test('a pending response blocks duplicates and a confirmed response completes the form', async () => {
-  const f = formulario({ delay: 10000 });
+  const f = formulario({ delay: 4000 });
   const pending = f.submit();
-  await f.advance(6000);
+  await f.advance(2000);
   assert.equal(f.fields.get('#enviar').disabled, true);
   assert.equal(f.requests[0].signal.aborted, false);
   await f.submit();
   assert.equal(f.requests.length, 1);
-  await f.advance(4000);
+  await f.advance(2000);
   await pending;
   assert.equal(f.fields.get('#rsvp').hidden, true);
   assert.equal(f.fields.get('#gracias').hidden, false);
@@ -125,14 +126,18 @@ test('a pending response blocks duplicates and a confirmed response completes th
   assert.equal(f.requests.length, 1);
 });
 
-test('encodes accents, companion, dietary requirements and every bus choice', async () => {
-  const f = formulario({ response: { success: 'true' } });
+test('posts all RSVP fields to FormSend with the correct recipient and subject', async () => {
+  const f = formulario();
   const pending = f.submit();
   const request = f.requests[0];
+  assert.equal(request.url, 'https://formsend.co/functions/handleSubmission');
   assert.equal(request.method, 'POST');
   assert.equal(Object.keys(request.headers).join(), 'Accept');
   assert.ok(request.body instanceof URLSearchParams);
   const data = Object.fromEntries(new URLSearchParams(request.body.toString()));
+  assert.equal(data._email, 'test@example.invalid');
+  assert.equal(data._subject, 'Confirmación boda Adriana & Pablo: María Muñoz + José García');
+  assert.equal(data._honeypot, '');
   assert.equal(data.Nombre, 'María Muñoz');
   assert.equal(data.Acompañante, 'José García');
   assert.equal(data['Restricciones alimenticias'], 'Celiaquía / Gluten');
@@ -147,20 +152,20 @@ test('encodes accents, companion, dietary requirements and every bus choice', as
 });
 
 test('waits for the response body as well as the HTTP headers', async () => {
-  const f = formulario({ bodyDelay: 10000 });
+  const f = formulario({ bodyDelay: 4000 });
   const pending = f.submit();
-  await f.advance(6000);
+  await f.advance(2000);
   assert.equal(f.fields.get('#gracias').hidden, true);
   assert.equal(f.requests[0].signal.aborted, false);
-  await f.advance(4000);
+  await f.advance(2000);
   await pending;
   assert.equal(f.fields.get('#gracias').hidden, false);
 });
 
-test('a hung request stops after 12 seconds, preserves values and offers direct email', async () => {
+test('a hung request stops after five seconds, preserves values and offers direct email', async () => {
   const f = formulario({ delay: 180000 });
   const pending = f.submit();
-  await f.advance(12000);
+  await f.advance(5000);
   await pending;
   assert.equal(f.requests[0].signal.aborted, true);
   assert.equal(f.requests.length, 1);
@@ -172,7 +177,7 @@ test('a hung request stops after 12 seconds, preserves values and offers direct 
   assert.match(f.fields.get('#aviso-rsvp').textContent, /enviar tus respuestas por correo/);
   assert.equal(f.fields.get('#rsvp-alternativa').hidden, false);
   assert.equal(f.fields.get('#enviar').attributes['aria-busy'], undefined);
-  await f.advance(168000);
+  await f.advance(175000);
   assert.equal(f.fields.get('#gracias').hidden, true);
   assert.equal(f.requests.length, 1);
 });
@@ -180,7 +185,7 @@ test('a hung request stops after 12 seconds, preserves values and offers direct 
 test('the deadline also stops a response body that never finishes', async () => {
   const f = formulario({ bodyDelay: 180000 });
   const pending = f.submit();
-  await f.advance(12000);
+  await f.advance(5000);
   await pending;
   assert.equal(f.requests[0].signal.aborted, true);
   assert.equal(f.fields.get('#enviar').disabled, false);
@@ -193,7 +198,9 @@ for (const [label, options] of [
   ['HTTP error', { status: 503 }],
   ['service rejection', { response: { success: false } }],
   ['missing acknowledgement', { response: {} }],
-  ['unexpected acknowledgement type', { response: { success: ['true'] } }],
+  ['spam classification despite HTTP success', { response: { success: true, is_spam: true } }],
+  ['no notification queued despite successful storage', { response: { ...queued, email: { queued: 0 } } }],
+  ['missing queue status', { response: { success: true, is_spam: false } }],
   ['null response', { response: null }],
 ]) {
   test(`${label} never displays a false success and allows an explicit retry`, async () => {
@@ -224,7 +231,7 @@ test('offline submission does not send a request or lock the form', async () => 
   assert.equal(f.fields.get('#rsvp-alternativa').hidden, false);
 });
 
-test('a direct email draft uses the current validated answers without calling FormSubmit', async () => {
+test('a direct email draft uses the current validated answers without calling FormSend', async () => {
   const f = formulario({ online: false });
   await f.submit();
   f.fields.get('#f-nombre').value = 'María & José';

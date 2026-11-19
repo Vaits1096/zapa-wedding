@@ -7,7 +7,7 @@
 
 <!-- ═══════════════════════════════════════════════════════════════
      CONFIGURACIÓN — todo lo editable está al principio del <script>:
-       CORREO_RSVP → buzón que recibe las confirmaciones (vía FormSubmit)
+       CORREO_RSVP → buzón que recibe las confirmaciones (vía FormSend)
        IBAN        → cuenta para el regalo
      Carpetas que necesita:
        fotos/   pedida.jpg  muro.jpg  campo.jpg  noche.jpg  calle.jpg
@@ -1132,7 +1132,7 @@ label.marca{
 
       <form id="rsvp" class="aparece" novalidate>
         <!-- trampa para robots: una persona nunca lo ve ni lo rellena -->
-        <input type="text" name="_honey" tabindex="-1" autocomplete="off" hidden>
+        <input type="text" name="_honeypot" tabindex="-1" autocomplete="off" hidden>
 
         <div class="campo">
           <label for="f-nombre">Nombre y apellidos</label>
@@ -1266,7 +1266,7 @@ label.marca{
 <script>
 /* ═══ CONFIGURACIÓN ═══════════════════════════════════════════════ */
 const FECHA_BODA  = new Date('2027-05-15T13:00:00');   // sabado 15 de mayo de 2027, ceremonia a las 13:00
-const CORREO_RSVP = 'taboada.pab@gmail.com';            // recibe las confirmaciones (FormSubmit)
+const CORREO_RSVP = 'taboada.pab@gmail.com';            // recibe las confirmaciones (FormSend)
 const IBAN        = 'ES91 1465 0100 9217 6154 0168';    // cuenta para el regalo
 const CANCION     = 'musica/cancion.mp3';               // opcional
 const RESTRICCIONES = ['Celiaquía / Gluten', 'Lactosa', 'Diabetes', 'Marisco', 'Pescado',
@@ -1585,23 +1585,25 @@ $('#rsvp').addEventListener('submit', async (e) => {
   $('#aviso-rsvp-copia').textContent = '';
   avisar('');
   const corte = new AbortController();
-  const limite = setTimeout(() => corte.abort(), 12000);
+  const limite = setTimeout(() => corte.abort(), 5000);
   try {
-    const r = await fetch(`https://formsubmit.co/ajax/${CORREO_RSVP}`, {
+    const r = await fetch('https://formsend.co/functions/handleSubmission', {
       method: 'POST',
       // El formato de un formulario normal evita una petición CORS previa.
       headers: { Accept: 'application/json' },
       body: new URLSearchParams({
         ...datos,
+        _email: CORREO_RSVP,
         _subject: asuntoConfirmacion(datos),
-        _template: 'table',
-        _honey: $('#rsvp [name=_honey]').value,
+        _honeypot: $('#rsvp [name=_honeypot]').value,
       }),
       signal: corte.signal,
     });
-    if (!r.ok) throw new Error('Error de FormSubmit');
+    if (!r.ok) throw new Error('Error de FormSend');
     const respuesta = await r.json();
-    if (respuesta?.success !== true && respuesta?.success !== 'true') throw new Error('Sin confirmación del servicio');
+    if (respuesta?.success !== true || respuesta.is_spam !== false || !(respuesta.email?.queued > 0)) {
+      throw new Error('FormSend no ha puesto el correo en cola');
+    }
     $('#rsvp').hidden = true;
     $('#gracias').textContent = `¡Gracias, ${datos.Nombre.split(/\s+/)[0]}! Hemos recibido tu confirmación.`;
     $('#gracias').hidden = false;
