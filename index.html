@@ -7,7 +7,8 @@
 
 <!-- ═══════════════════════════════════════════════════════════════
      CONFIGURACIÓN — todo lo editable está al principio del <script>:
-       CORREO_RSVP → buzón que recibe las confirmaciones (vía FormSend)
+       CORREO_RSVP → buzón para las confirmaciones por correo
+       ID_FORMULARIO_RSVP → ID público del formulario verificado en Web3Forms
        IBAN        → cuenta para el regalo
      Carpetas que necesita:
        fotos/   pedida.jpg  muro.jpg  campo.jpg  noche.jpg  calle.jpg
@@ -433,6 +434,7 @@ label.marca{
 .aviso{font-size:15px;font-style:italic;color:var(--texto-tenue);text-align:center}
 .banda--negro .aviso{color:rgba(238,238,238,.6)}
 .rsvp-alternativa:not([hidden]){display:grid;gap:12px;text-align:center}
+#rsvp-abrir-correo[hidden]{display:none}
 
 /* regalo */
 .iban{
@@ -1132,7 +1134,7 @@ label.marca{
 
       <form id="rsvp" class="aparece" novalidate>
         <!-- trampa para robots: una persona nunca lo ve ni lo rellena -->
-        <input type="text" name="_honeypot" tabindex="-1" autocomplete="off" hidden>
+        <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" hidden>
 
         <div class="campo">
           <label for="f-nombre">Nombre y apellidos</label>
@@ -1210,6 +1212,7 @@ label.marca{
         </div>
 
         <button type="submit" class="boton" id="enviar">Confirmar asistencia</button>
+        <p class="aviso" id="rsvp-instrucciones-correo" hidden>Se abrirá un borrador con tus respuestas.</p>
         <p class="aviso" id="aviso-rsvp" aria-live="polite"></p>
         <div class="rsvp-alternativa" id="rsvp-alternativa" hidden>
           <button type="button" class="boton fino" id="rsvp-abrir-correo">Abrir borrador de correo</button>
@@ -1266,7 +1269,8 @@ label.marca{
 <script>
 /* ═══ CONFIGURACIÓN ═══════════════════════════════════════════════ */
 const FECHA_BODA  = new Date('2027-05-15T13:00:00');   // sabado 15 de mayo de 2027, ceremonia a las 13:00
-const CORREO_RSVP = 'taboada.pab@gmail.com';            // recibe las confirmaciones (FormSend)
+const CORREO_RSVP = 'taboada.pab@gmail.com';            // recibe las confirmaciones por correo
+const ID_FORMULARIO_RSVP = '';                         // ID público de Web3Forms una vez verificada la entrega al buzón
 const IBAN        = 'ES91 1465 0100 9217 6154 0168';    // cuenta para el regalo
 const CANCION     = 'musica/cancion.mp3';               // opcional
 const RESTRICCIONES = ['Celiaquía / Gluten', 'Lactosa', 'Diabetes', 'Marisco', 'Pescado',
@@ -1502,7 +1506,14 @@ function avisar(texto, foco) {
 
 const enviar = $('#enviar');
 const alternativaRsvp = $('#rsvp-alternativa');
+const abrirCorreo = $('#rsvp-abrir-correo');
 $('#rsvp-direccion').textContent = CORREO_RSVP;
+if (!ID_FORMULARIO_RSVP) {
+  enviar.textContent = 'Confirmar por correo';
+  $('#rsvp-instrucciones-correo').hidden = false;
+  abrirCorreo.hidden = true;
+  alternativaRsvp.hidden = false;
+}
 
 function leerConfirmacion() {
   const nombre  = $('#f-nombre').value.trim();
@@ -1542,13 +1553,16 @@ function textoConfirmacion(datos) {
   return Object.entries(datos).map(([campo, valor]) => `${campo}: ${valor}`).join('\r\n');
 }
 
-$('#rsvp-abrir-correo').addEventListener('click', () => {
-  const datos = leerConfirmacion();
-  if (!datos) return;
+function abrirBorrador(datos) {
   const asunto = encodeURIComponent(asuntoConfirmacion(datos));
   const cuerpo = encodeURIComponent(textoConfirmacion(datos));
-  location.href = `mailto:${CORREO_RSVP}?subject=${asunto}&body=${cuerpo}`;
   avisar('Pulsa Enviar en tu aplicación de correo para confirmar la asistencia.');
+  location.href = `mailto:${CORREO_RSVP}?subject=${asunto}&body=${cuerpo}`;
+}
+
+abrirCorreo.addEventListener('click', () => {
+  const datos = leerConfirmacion();
+  if (datos) abrirBorrador(datos);
 });
 
 $('#rsvp-copiar').addEventListener('click', async () => {
@@ -1570,6 +1584,7 @@ $('#rsvp').addEventListener('submit', async (e) => {
   if (enviar.disabled || $('#rsvp').hidden) return;
   const datos = leerConfirmacion();
   if (!datos) return;
+  if (!ID_FORMULARIO_RSVP) return abrirBorrador(datos);
 
   if (navigator.onLine === false) {
     alternativaRsvp.hidden = false;
@@ -1587,23 +1602,20 @@ $('#rsvp').addEventListener('submit', async (e) => {
   const corte = new AbortController();
   const limite = setTimeout(() => corte.abort(), 5000);
   try {
-    const r = await fetch('https://formsend.co/functions/handleSubmission', {
+    const r = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      // El formato de un formulario normal evita una petición CORS previa.
-      headers: { Accept: 'application/json' },
-      body: new URLSearchParams({
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         ...datos,
-        _email: CORREO_RSVP,
-        _subject: asuntoConfirmacion(datos),
-        _honeypot: $('#rsvp [name=_honeypot]').value,
+        access_key: ID_FORMULARIO_RSVP,
+        subject: asuntoConfirmacion(datos),
+        botcheck: $('#rsvp [name=botcheck]').checked,
       }),
       signal: corte.signal,
     });
-    if (!r.ok) throw new Error('Error de FormSend');
+    if (!r.ok) throw new Error('Error de Web3Forms');
     const respuesta = await r.json();
-    if (respuesta?.success !== true || respuesta.is_spam !== false || !(respuesta.email?.queued > 0)) {
-      throw new Error('FormSend no ha puesto el correo en cola');
-    }
+    if (respuesta?.success !== true) throw new Error('Web3Forms no ha confirmado la respuesta');
     $('#rsvp').hidden = true;
     $('#gracias').textContent = `¡Gracias, ${datos.Nombre.split(/\s+/)[0]}! Hemos recibido tu confirmación.`;
     $('#gracias').hidden = false;

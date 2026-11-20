@@ -25,25 +25,27 @@ Todo lo configurable está junto, al principio del `<script>` del final de
 | constante    | qué es                                                   |
 |--------------|----------------------------------------------------------|
 | `FECHA_BODA` | fecha y hora de la boda. De aquí salen la cuenta atrás, la portada y el cierre |
-| `CORREO_RSVP` | correo que recibe las confirmaciones (vía FormSend)     |
+| `CORREO_RSVP` | correo que recibe las confirmaciones                   |
+| `ID_FORMULARIO_RSVP` | ID público de Web3Forms tras verificar la entrega |
 | `IBAN`       | cuenta para el regalo                                     |
 | `CANCION`    | ruta del mp3 de fondo (opcional)                          |
 | `RESTRICCIONES`, `TALLAS` | opciones de los desplegables del formulario  |
 
 ## Confirmaciones por correo
 
-El formulario manda cada respuesta a `CORREO_RSVP` mediante el modo anónimo
-de [FormSend](https://formsend.co/docs). Este modo admite envíos desde el
-primero sin crear una cuenta ni activar el buzón. El plan gratuito incluye
-250 envíos al mes. FormSend guarda las respuestas y pone los correos en cola,
-así que la notificación puede llegar unos minutos después de confirmar en la web.
+Con `ID_FORMULARIO_RSVP` vacío, el formulario prepara un borrador para `CORREO_RSVP`.
+Los invitados también pueden copiar las respuestas y enviarlas desde su correo web.
+En ambos casos deben pulsar Enviar desde su correo.
 
-El formulario espera hasta 5 segundos y solo muestra «Hemos recibido tu
-confirmación» cuando FormSend acepta la respuesta y pone el correo en cola. Si falla
-o se agota la espera, conserva las respuestas y ofrece abrir un borrador
-dirigido a `CORREO_RSVP` o copiar los datos para enviarlos desde el correo web.
-El invitado pulsa Enviar en su propio correo. El formulario no reintenta el
-envío automáticamente.
+Para habilitar el envío automático, crea un formulario en
+[Web3Forms](https://app.web3forms.com/) con `CORREO_RSVP` como destinatario.
+Comprueba con datos de prueba que el correo llega a ese buzón antes de publicar
+el ID público del formulario en `ID_FORMULARIO_RSVP`. La web muestra el
+agradecimiento cuando el servicio confirma la respuesta. Si la solicitud falla
+o tarda más de 5 segundos, el invitado puede enviar sus respuestas desde su correo.
+
+Para recuperar confirmaciones anteriores, [FormSend](https://formsend.co/anonymous)
+indica que se pueden consultar en su panel al registrarse con `CORREO_RSVP`.
 
 Para comprobar las regresiones del envío sin mandar correos reales:
 

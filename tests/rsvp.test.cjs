@@ -7,10 +7,10 @@ const { join } = require('node:path');
 const html = readFileSync(join(__dirname, '..', 'index.html'), 'utf8');
 const source = html.slice(html.indexOf('function avisar('), html.indexOf("$('#copiar-iban').addEventListener"));
 const flush = () => new Promise(setImmediate);
-const queued = { success: true, is_spam: false, email: { queued: 1 } };
+const formId = '12345678-1234-4123-8123-123456789abc';
 
 // Run the real submit handler with a controlled network and clock: no emails.
-function formulario({ delay = 0, bodyDelay = 0, status = 200, response = queued, failure, online = true, clipboard = true } = {}) {
+function formulario({ delay = 0, bodyDelay = 0, status = 200, response = { success: true }, failure, online = true, clipboard = true, id = formId } = {}) {
   let now = 0;
   let nextTimer = 0;
   let submit;
@@ -23,13 +23,14 @@ function formulario({ delay = 0, bodyDelay = 0, status = 200, response = queued,
   const fields = new Map();
   for (const [selector, value] of Object.entries({
     '#f-nombre': '  María Muñoz  ', '#f-nombre2': 'José García',
-    '#f-talla': '38', '#f-talla2': '40', '#rsvp [name=_honeypot]': '',
+    '#f-talla': '38', '#f-talla2': '40',
     '#dieta-otro': '', '#dieta2-otro': '',
   })) fields.set(selector, { value });
+  fields.set('#rsvp [name=botcheck]', { checked: false });
   for (const selector of ['#rsvp', '#enviar', '#aviso-rsvp', '#gracias', '#rsvp-alternativa',
-    '#rsvp-direccion', '#rsvp-abrir-correo', '#rsvp-copiar', '#rsvp-texto', '#aviso-rsvp-copia']) {
+    '#rsvp-direccion', '#rsvp-abrir-correo', '#rsvp-instrucciones-correo', '#rsvp-copiar', '#rsvp-texto', '#aviso-rsvp-copia']) {
     fields.set(selector, {
-      hidden: ['#gracias', '#rsvp-alternativa', '#rsvp-texto'].includes(selector),
+      hidden: ['#gracias', '#rsvp-alternativa', '#rsvp-instrucciones-correo', '#rsvp-texto'].includes(selector),
       disabled: false, textContent: '', attributes: {},
       focus() { this.focused = true; },
       select() { this.selected = true; },
@@ -54,9 +55,9 @@ function formulario({ delay = 0, bodyDelay = 0, status = 200, response = queued,
       onLine: online,
       clipboard: clipboard ? { async writeText(value) { copied.push(value); } } : undefined,
     },
-    location, CORREO_RSVP: 'test@example.invalid',
+    location, CORREO_RSVP: 'test@example.invalid', ID_FORMULARIO_RSVP: id,
     document: { querySelector: () => ({ focus() {} }) },
-    URLSearchParams, AbortController,
+    AbortController,
     setTimeout: schedule, clearTimeout: (id) => timers.delete(id),
     fetch(url, options) {
       requests.push({ url, ...options });
@@ -126,18 +127,18 @@ test('a pending response blocks duplicates and a confirmed response completes th
   assert.equal(f.requests.length, 1);
 });
 
-test('posts all RSVP fields to FormSend with the correct recipient and subject', async () => {
+test('posts all RSVP fields to the configured Web3Forms endpoint', async () => {
   const f = formulario();
   const pending = f.submit();
   const request = f.requests[0];
-  assert.equal(request.url, 'https://formsend.co/functions/handleSubmission');
+  assert.equal(request.url, 'https://api.web3forms.com/submit');
   assert.equal(request.method, 'POST');
-  assert.equal(Object.keys(request.headers).join(), 'Accept');
-  assert.ok(request.body instanceof URLSearchParams);
-  const data = Object.fromEntries(new URLSearchParams(request.body.toString()));
-  assert.equal(data._email, 'test@example.invalid');
-  assert.equal(data._subject, 'Confirmación boda Adriana & Pablo: María Muñoz + José García');
-  assert.equal(data._honeypot, '');
+  assert.equal(request.headers.Accept, 'application/json');
+  assert.equal(request.headers['Content-Type'], 'application/json');
+  const data = JSON.parse(request.body);
+  assert.equal(data.access_key, formId);
+  assert.equal(data.subject, 'Confirmación boda Adriana & Pablo: María Muñoz + José García');
+  assert.equal(data.botcheck, false);
   assert.equal(data.Nombre, 'María Muñoz');
   assert.equal(data.Acompañante, 'José García');
   assert.equal(data['Restricciones alimenticias'], 'Celiaquía / Gluten');
@@ -198,9 +199,7 @@ for (const [label, options] of [
   ['HTTP error', { status: 503 }],
   ['service rejection', { response: { success: false } }],
   ['missing acknowledgement', { response: {} }],
-  ['spam classification despite HTTP success', { response: { success: true, is_spam: true } }],
-  ['no notification queued despite successful storage', { response: { ...queued, email: { queued: 0 } } }],
-  ['missing queue status', { response: { success: true, is_spam: false } }],
+  ['string acknowledgement', { response: { success: 'true' } }],
   ['null response', { response: null }],
 ]) {
   test(`${label} never displays a false success and allows an explicit retry`, async () => {
@@ -231,7 +230,7 @@ test('offline submission does not send a request or lock the form', async () => 
   assert.equal(f.fields.get('#rsvp-alternativa').hidden, false);
 });
 
-test('a direct email draft uses the current validated answers without calling FormSend', async () => {
+test('a direct email draft uses the current validated answers without a second request', async () => {
   const f = formulario({ online: false });
   await f.submit();
   f.fields.get('#f-nombre').value = 'María & José';
@@ -256,6 +255,20 @@ test('a direct email draft uses the current validated answers without calling Fo
   assert.equal(f.requests.length, 0);
   assert.equal(f.fields.get('#gracias').hidden, true);
   assert.match(f.fields.get('#aviso-rsvp').textContent, /Pulsa Enviar/);
+});
+
+test('while email delivery is unverified, submit opens a draft directly and leaves webmail copy available', async () => {
+  const f = formulario({ id: '' });
+  assert.equal(f.fields.get('#enviar').textContent, 'Confirmar por correo');
+  assert.equal(f.fields.get('#rsvp-instrucciones-correo').hidden, false);
+  assert.equal(f.fields.get('#rsvp-abrir-correo').hidden, true);
+  assert.equal(f.fields.get('#rsvp-alternativa').hidden, false);
+  await f.submit();
+  assert.equal(new URL(f.location.href).protocol, 'mailto:');
+  assert.equal(f.requests.length, 0);
+  assert.equal(f.fields.get('#gracias').hidden, true);
+  await f.click('#rsvp-copiar');
+  assert.match(f.copied[0], /Bus regreso a Elciego: 01:00/);
 });
 
 test('webmail users can copy their answers even without clipboard access', async () => {
@@ -294,7 +307,7 @@ test('without companion, stale companion fields are excluded and buses remain op
   f.radios.acompanante = 'No';
   f.radios.bus_ida = '';
   const pending = f.submit();
-  const data = Object.fromEntries(f.requests[0].body);
+  const data = JSON.parse(f.requests[0].body);
   assert.equal(data.Acompañante, '—');
   assert.equal(data['Restricciones del acompañante'], '—');
   assert.equal(data['Talla de calzado del acompañante'], '—');
